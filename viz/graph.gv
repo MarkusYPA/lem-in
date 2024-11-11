@@ -1,0 +1,23 @@
+digraph G {
+    ratio=1;
+    pad=0.5;
+    edge [arrowhead=none];
+
+    0 [shape=box];
+    5 [shape=box];
+
+    4 [fixedsize=true height= 0, width=0 color="transparent"];
+    0 [fixedsize=true height= 0, width=0 color="transparent"];
+    1 [fixedsize=true height= 0, width=0 color="transparent"];
+    5 [fixedsize=true height= 0, width=0 color="transparent"];
+    2 [fixedsize=true height= 0, width=0 color="transparent"];
+    3 [fixedsize=true height= 0, width=0 color="transparent"];
+
+    0 -> 1;
+    2 -> 4;
+    1 -> 4;
+    0 -> 2;
+    4 -> 5;
+    3 -> 0;
+    4 -> 3;
+}

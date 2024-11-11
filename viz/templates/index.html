@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ant Movement Animation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.1/gsap.min.js"></script>
+</head>
+
+<body>
+
+    <div id="svg-container">
+        <!-- The SVG will be loaded here -->
+    </div>
+
+    {{range .Ants}}
+    <h3>{{.Name}}</h3>
+    {{end}}
+
+    <script>
+        // Load the SVG dynamically
+        fetch("{{ .Drawing }}") // "simple.svg"
+            .then(response => response.text()) // "response" is what fetch got, response.text() goes to the next then
+            .then(svgContent => {
+                // Insert the SVG content into the container
+                document.getElementById("svg-container").innerHTML = svgContent;
+
+                const svgContainer = document.getElementById("svg-container");
+                const svgElement = svgContainer.querySelector("svg");
+
+                // Find the main <g> element to apply its transformations
+                const mainGroup = svgElement.querySelector("g.graph");
+                const transform = mainGroup.getAttribute("transform");
+
+                // The circle to cover each node
+                function addCircle(x, y) {
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circle.setAttribute("r", "20");
+                    circle.setAttribute("fill", "lightblue");
+                    circle.setAttribute("cx", x);
+                    circle.setAttribute("cy", y - 4);
+                    circle.setAttribute("transform", transform);
+                    svgElement.appendChild(circle);
+                }
+
+                // Draw circles on top of nodes
+                var nodes = Array.from(document.querySelectorAll('g.node'));
+                nodes.forEach(function (node) {
+                    var x = node.querySelector('text').getAttribute('x');
+                    var y = node.querySelector('text').getAttribute('y');
+                    addCircle(x, y)
+
+                    // Redraw text
+                    var textElement = node.querySelector('text');
+                    textElement.setAttribute("transform", transform);
+                    svgElement.appendChild(textElement);
+                });
+
+                // Find the coordinates of the "start" node
+                const startNodeTitle = Array.from(svgElement.querySelectorAll("title"))
+                    .find(el => el.textContent === "{{ .Start }}"); //"start"
+
+                // Put red circle to start node
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                if (startNodeTitle) {
+                    const startNode = startNodeTitle.parentNode.querySelector("polygon");
+
+                    // Get initial coordinates for the start node
+                    const startCoords = startNode.getAttribute("points").split(" ")[0].split(",");
+                    const startX = parseFloat(startCoords[0]);
+                    const startY = parseFloat(startCoords[1]);
+
+                    // Set red dot attributes                    
+                    circle.setAttribute("r", "5");
+                    circle.setAttribute("fill", "red");
+                    circle.setAttribute("cx", startX);
+                    circle.setAttribute("cy", startY);
+                    circle.setAttribute("transform", transform); // Apply the main transform
+                    svgElement.appendChild(circle);
+                }
+
+                const turnLen = 1.5;
+                // Function that moves the red dot
+                function animateAlong(title) {
+                    const pathTitle = Array.from(svgElement.querySelectorAll("title")).find(el => el.textContent === title);
+                    const path = pathTitle.parentNode.querySelector("path");
+
+                    const val = { distance: 0 };    // An object that GreenSock (gsap) can animate
+                    // Tween
+                    gsap.to(val, {
+                        // Animate from distance 0 to the total distance
+                        distance: path.getTotalLength(),
+                        repeat: 0, // Loops (-1 for infinite)
+                        duration: turnLen,
+                        ease: "power1.inOut", // "none" for constant speed
+                        onUpdate: () => {
+                            // Query a point at the new distance value
+                            const point = path.getPointAtLength(val.distance);
+                            circle.setAttribute('cx', point.x);
+                            circle.setAttribute('cy', point.y);
+                        }
+                    });
+                }
+
+                /*
+                                for vuorot {
+                                    for liike {
+                                        liikuta murkkua
+                                    }                
+                                    odota hetki
+                                }
+                
+                                Tai
+                
+                                for i:= vuoro {
+                                    for murkut {
+                                        suorita liike[i]
+                                    }
+                                    odota hetki          
+                                }
+                
+                                Nyt:
+                
+                                for reitit {
+                                    for reitti {
+                                        odota hetki
+                                        animoi palloa
+                                    }
+                                }
+                */
+
+
+                const paths = [["start->mid", "mid->end"]];
+                (async function animateDot() {
+                    for (const path of paths) {
+                        for (const link of path) {
+                            await new Promise(r => setTimeout(r, turnLen * 1500));
+                            await animateAlong(link);
+                        }
+                    }
+                })();
+
+            })
+
+    </script>
+
+</body>
+
+</html>

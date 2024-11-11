@@ -3,15 +3,32 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"html/template"
+	"net/http"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
 
 type ant struct {
-	name  string   // a number
-	moves []string // target room, max one per turn
+	Name  string   // a number
+	Moves []string // target room, max one per turn
 }
+
+type PageData struct {
+	Ants    []ant
+	Turns   []string
+	Drawing string
+	Start   string
+	End     string
+}
+
+var ants []ant
+var gvname string
+var turnList []string
+var startGlob string
+var endGlob string
 
 func checkErr(e error) {
 	if e != nil {
@@ -20,24 +37,37 @@ func checkErr(e error) {
 	}
 }
 
-func main() {
+func scanInput() []string {
 	scanner := bufio.NewScanner(os.Stdin)
-	output := []string{}
+	input := []string{}
 	for scanner.Scan() {
-		output = append(output, scanner.Text())
+		input = append(input, scanner.Text())
 	}
+	return input
+}
 
-	antsAmount, err := strconv.Atoi(output[0])
-	checkErr(err)
-
+func parseInput(input []string) (string, string, []string, []string, []string) {
+	start := ""
+	end := ""
 	links := []string{}
 	turns := []string{}
+	rooms := []string{}
 	var readingMoves bool
-	for _, line := range output {
+	for i, line := range input {
 		if !readingMoves {
 			if len(line) > 1 && line[0:2] != "##" && !strings.Contains(line, " ") && strings.Contains(line, "-") {
 				twoRooms := strings.Split(line, "-")
-				links = append(links, twoRooms[0]+" --> "+twoRooms[1]+";")
+				links = append(links, twoRooms[0]+" -> "+twoRooms[1]+";")
+			}
+			if len(line) > 1 && line[0:2] != "##" && strings.Contains(line, " ") && !strings.Contains(line, "-") {
+				roomInfo := strings.Split(line, " ")
+				rooms = append(rooms, roomInfo[0])
+			}
+			if line == "##start" {
+				start = strings.Fields(input[i+1])[0]
+			}
+			if line == "##end" {
+				end = strings.Fields(input[i+1])[0]
 			}
 		} else {
 			if line[0:2] != "##" && line[0] == 'L' && strings.Contains(line, "-") {
@@ -48,27 +78,98 @@ func main() {
 			readingMoves = true
 		}
 	}
+	return start, end, links, turns, rooms
+}
 
-	ants := []ant{}
-	for i := range antsAmount {
-		ants = append(ants, ant{name: strconv.Itoa(i + 1), moves: make([]string, len(turns))})
+func makeAnts(amount int, turns []string) {
+	for i := range amount {
+		ants = append(ants, ant{Name: strconv.Itoa(i + 1), Moves: make([]string, len(turns))})
 	}
-
 	for _, ant := range ants {
-		for i := range ant.moves {
+		for i := range ant.Moves {
 			allMovesThisTurn := strings.Fields(turns[i])
 			for _, move := range allMovesThisTurn {
 				twoParts := strings.Split(move, "-")
-				if twoParts[0][1:] == ant.name {
-					ant.moves[i] = twoParts[1]
+				if twoParts[0][1:] == ant.Name {
+					ant.Moves[i] = twoParts[1]
 				}
 			}
 		}
 	}
+}
 
-	fmt.Println(links)
-
-	for _, ant := range ants {
-		fmt.Println(ant.name, ant.moves)
+func createGVfile(start, end string, rooms, links []string) string {
+	gvfile := "digraph G {\n    ratio=1;\n    pad=0.5;\n    edge [arrowhead=none];\n\n"
+	gvfile += "    " + start + " [shape=box];\n" + "    " + end + " [shape=box];\n\n"
+	for _, room := range rooms {
+		gvfile += "    " + room + " " + "[fixedsize=true height= 0, width=0 color=\"transparent\"];\n"
 	}
+	gvfile += "\n"
+	for _, ln := range links {
+		gvfile += "    " + ln + "\n"
+	}
+	gvfile += "}"
+
+	// Make a .gv file for graphviz
+	name := "graph.gv"
+	err := os.WriteFile(name, []byte(gvfile), 0644)
+	checkErr(err)
+
+	cmd := exec.Command("dot", "-Tsvg", name, "-o", "graph.svg")
+	_, err = cmd.Output()
+	checkErr(err)
+
+	return name
+}
+
+var tpl = template.Must(template.ParseFiles("templates/index.html"))
+
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	data := PageData{
+		Ants:    ants,
+		Turns:   turnList,
+		Drawing: gvname,
+		Start:   startGlob,
+		End:     endGlob,
+	}
+
+	if r.URL.Path != "/" {
+		http.Error(w, "404 Not Found", http.StatusNotFound) // error 404
+		return
+	}
+	if r.Method != http.MethodGet {
+		http.Error(w, "400 Bad Request", http.StatusNotFound)
+		return
+	}
+
+	tpl.Execute(w, data)
+}
+
+func startServer() {
+	http.HandleFunc("/", homeHandler)
+	fmt.Println("Server is running at http://localhost:8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+func main() {
+	input := scanInput()
+	start, end, links, turns, rooms := parseInput(input)
+	turnList = turns
+	startGlob = start
+	endGlob = end
+
+	antsAmount, err := strconv.Atoi(input[0])
+	checkErr(err)
+
+	makeAnts(antsAmount, turns)
+	gvname = createGVfile(start, end, rooms, links)
+
+	fmt.Println(gvname)
+	for _, ant := range ants {
+		fmt.Println(ant.Name, ant.Moves)
+	}
+
+	fmt.Printf("\n%s %s\n", start, end)
+
+	startServer()
 }
