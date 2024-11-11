@@ -67,8 +67,8 @@ func main() {
 	}
 
 	fmt.Println(links)
+
 	for _, ant := range ants {
 		fmt.Println(ant.name, ant.moves)
 	}
-
 }
