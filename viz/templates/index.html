@@ -16,11 +16,18 @@
 
     {{range .Ants}}
     <h3>{{.Name}}</h3>
+
+    {{range .Moves}}
+    <p class="move">{{.}}</p>
+    {{end}}
+
     {{end}}
 
     <script>
         // Load the SVG dynamically
-        fetch("{{ .Drawing }}") // "simple.svg"
+        console.log("{{ .Drawing }}")
+
+        fetch("static/{{ .Drawing }}") // "simple.svg" "{{ .Drawing }}"
             .then(response => response.text()) // "response" is what fetch got, response.text() goes to the next then
             .then(svgContent => {
                 // Insert the SVG content into the container
@@ -36,7 +43,7 @@
                 // The circle to cover each node
                 function addCircle(x, y) {
                     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    circle.setAttribute("r", "20");
+                    circle.setAttribute("r", "12");
                     circle.setAttribute("fill", "lightblue");
                     circle.setAttribute("cx", x);
                     circle.setAttribute("cy", y - 4);
@@ -59,7 +66,7 @@
 
                 // Find the coordinates of the "start" node
                 const startNodeTitle = Array.from(svgElement.querySelectorAll("title"))
-                    .find(el => el.textContent === "{{ .Start }}"); //"start"
+                    .find(el => el.textContent === "{{ .Start }}");
 
                 // Put red circle to start node
                 const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -83,6 +90,9 @@
                 const turnLen = 1.5;
                 // Function that moves the red dot
                 function animateAlong(title) {
+                    if (title == "") {
+                        return;
+                    }
                     const pathTitle = Array.from(svgElement.querySelectorAll("title")).find(el => el.textContent === title);
                     const path = pathTitle.parentNode.querySelector("path");
 
@@ -103,38 +113,24 @@
                     });
                 }
 
-                /*
-                                for vuorot {
-                                    for liike {
-                                        liikuta murkkua
-                                    }                
-                                    odota hetki
-                                }
-                
-                                Tai
-                
-                                for i:= vuoro {
-                                    for murkut {
-                                        suorita liike[i]
-                                    }
-                                    odota hetki          
-                                }
-                
-                                Nyt:
-                
-                                for reitit {
-                                    for reitti {
-                                        odota hetki
-                                        animoi palloa
-                                    }
-                                }
-                */
+                let ants = "{{ .Moves }}";
+                ants = ants.replaceAll("[[", "").replaceAll("]]", "");
+                let eachAnt = ants.split("] [");
 
+                let listOfMovelists = [];
+                for (let i = 0; i < eachAnt.length; i++) {
+                    let moovs = eachAnt[i].split(" ");
+                    listOfMovelists.push(moovs);
+                }
 
-                const paths = [["start->mid", "mid->end"]];
                 (async function animateDot() {
-                    for (const path of paths) {
-                        for (const link of path) {
+                    for (let i=0; i < listOfMovelists.length; i++) {
+
+                        if (i == 0) {
+                            // create red dot / ant
+                        }
+                    
+                        for (const link of listOfMovelists[i]) {
                             await new Promise(r => setTimeout(r, turnLen * 1500));
                             await animateAlong(link);
                         }

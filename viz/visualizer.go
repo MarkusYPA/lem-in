@@ -19,6 +19,7 @@ type ant struct {
 type PageData struct {
 	Ants    []ant
 	Turns   []string
+	Moves   [][]string
 	Drawing string
 	Start   string
 	End     string
@@ -85,13 +86,16 @@ func makeAnts(amount int, turns []string) {
 	for i := range amount {
 		ants = append(ants, ant{Name: strconv.Itoa(i + 1), Moves: make([]string, len(turns))})
 	}
+
 	for _, ant := range ants {
+		prev := startGlob
 		for i := range ant.Moves {
 			allMovesThisTurn := strings.Fields(turns[i])
 			for _, move := range allMovesThisTurn {
 				twoParts := strings.Split(move, "-")
 				if twoParts[0][1:] == ant.Name {
-					ant.Moves[i] = twoParts[1]
+					ant.Moves[i] = prev + "->" + twoParts[1]
+					prev = twoParts[1]
 				}
 			}
 		}
@@ -111,23 +115,32 @@ func createGVfile(start, end string, rooms, links []string) string {
 	gvfile += "}"
 
 	// Make a .gv file for graphviz
-	name := "graph.gv"
-	err := os.WriteFile(name, []byte(gvfile), 0644)
+	nameGV := "graph.gv"
+	nameSVG := "graph.svg"
+	path := "static/"
+	err := os.WriteFile(nameGV, []byte(gvfile), 0644)
 	checkErr(err)
 
-	cmd := exec.Command("dot", "-Tsvg", name, "-o", "graph.svg")
+	cmd := exec.Command("dot", "-Tsvg", nameGV, "-o", path+nameSVG)
 	_, err = cmd.Output()
 	checkErr(err)
 
-	return name
+	return nameSVG
 }
 
 var tpl = template.Must(template.ParseFiles("templates/index.html"))
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
+
+	antMoves := [][]string{}
+	for _, ant := range ants {
+		antMoves = append(antMoves, ant.Moves)
+	}
+
 	data := PageData{
 		Ants:    ants,
 		Turns:   turnList,
+		Moves:   antMoves,
 		Drawing: gvname,
 		Start:   startGlob,
 		End:     endGlob,
@@ -146,6 +159,9 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func startServer() {
+	fileServer := http.FileServer(http.Dir("./static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fileServer))
+
 	http.HandleFunc("/", homeHandler)
 	fmt.Println("Server is running at http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
@@ -164,12 +180,14 @@ func main() {
 	makeAnts(antsAmount, turns)
 	gvname = createGVfile(start, end, rooms, links)
 
-	fmt.Println(gvname)
-	for _, ant := range ants {
-		fmt.Println(ant.Name, ant.Moves)
+	for i := range turns {
+		for _, a := range ants {
+			fmt.Println(a.Name, a.Moves[i])
+		}
+		fmt.Println()
 	}
 
-	fmt.Printf("\n%s %s\n", start, end)
+	fmt.Println()
 
 	startServer()
 }
