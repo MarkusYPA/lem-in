@@ -103,6 +103,30 @@ func makeAnts(amount int, turns []string) {
 }
 
 func createGVfile(start, end string, rooms, links []string) string {
+
+	// Some links (and so svg paths) are back-to-front for my purposes
+	// Write down format for link from ant moves, original and reverse
+	differentMoves := [][2]string{}
+	for _, ant := range ants {
+		for _, m := range ant.Moves {
+			if len(m) > 0 {
+				parts := strings.Split(m, "->")
+				newForm1 := parts[0] + " -> " + parts[1]
+				newForm2 := parts[1] + " -> " + parts[0]
+				differentMoves = append(differentMoves, [2]string{newForm1, newForm2})
+			}
+		}
+	}
+
+	// Change link direction to ant movement direction when necessary
+	for _, mv := range differentMoves {
+		for j, link := range links {
+			if link == mv[1]+";" {
+				links[j] = mv[0]
+			}
+		}
+	}
+
 	gvfile := "digraph G {\n    ratio=1;\n    pad=0.5;\n    edge [arrowhead=none];\n\n"
 	gvfile += "    " + start + " [shape=box];\n" + "    " + end + " [shape=box];\n\n"
 	for _, room := range rooms {
@@ -179,15 +203,6 @@ func main() {
 
 	makeAnts(antsAmount, turns)
 	gvname = createGVfile(start, end, rooms, links)
-
-	for i := range turns {
-		for _, a := range ants {
-			fmt.Println(a.Name, a.Moves[i])
-		}
-		fmt.Println()
-	}
-
-	fmt.Println()
 
 	startServer()
 }

@@ -1,0 +1,70 @@
+100
+##start
+richard 0 6
+gilfoyle 6 3
+erlich 9 6
+dinish 6 9
+jimYoung 11 7
+##end
+peter 14 6
+richard-dinish
+dinish-jimYoung
+richard-gilfoyle
+gilfoyle-peter
+gilfoyle-erlich
+richard-erlich
+erlich-jimYoung
+jimYoung-peter
+
+L1-gilfoyle L3-dinish
+L1-peter L2-gilfoyle L3-jimYoung L5-dinish
+L2-peter L3-peter L4-gilfoyle L5-jimYoung L7-dinish
+L4-peter L5-peter L6-gilfoyle L7-jimYoung L9-dinish
+L6-peter L7-peter L8-gilfoyle L9-jimYoung L11-dinish
+L8-peter L9-peter L10-gilfoyle L11-jimYoung L13-dinish
+L10-peter L11-peter L12-gilfoyle L13-jimYoung L15-dinish
+L12-peter L13-peter L14-gilfoyle L15-jimYoung L17-dinish
+L14-peter L15-peter L16-gilfoyle L17-jimYoung L19-dinish
+L16-peter L17-peter L18-gilfoyle L19-jimYoung L21-dinish
+L18-peter L19-peter L20-gilfoyle L21-jimYoung L23-dinish
+L20-peter L21-peter L22-gilfoyle L23-jimYoung L25-dinish
+L22-peter L23-peter L24-gilfoyle L25-jimYoung L27-dinish
+L24-peter L25-peter L26-gilfoyle L27-jimYoung L29-dinish
+L26-peter L27-peter L28-gilfoyle L29-jimYoung L31-dinish
+L28-peter L29-peter L30-gilfoyle L31-jimYoung L33-dinish
+L30-peter L31-peter L32-gilfoyle L33-jimYoung L35-dinish
+L32-peter L33-peter L34-gilfoyle L35-jimYoung L37-dinish
+L34-peter L35-peter L36-gilfoyle L37-jimYoung L39-dinish
+L36-peter L37-peter L38-gilfoyle L39-jimYoung L41-dinish
+L38-peter L39-peter L40-gilfoyle L41-jimYoung L43-dinish
+L40-peter L41-peter L42-gilfoyle L43-jimYoung L45-dinish
+L42-peter L43-peter L44-gilfoyle L45-jimYoung L47-dinish
+L44-peter L45-peter L46-gilfoyle L47-jimYoung L49-dinish
+L46-peter L47-peter L48-gilfoyle L49-jimYoung L51-dinish
+L48-peter L49-peter L50-gilfoyle L51-jimYoung L53-dinish
+L50-peter L51-peter L52-gilfoyle L53-jimYoung L55-dinish
+L52-peter L53-peter L54-gilfoyle L55-jimYoung L57-dinish
+L54-peter L55-peter L56-gilfoyle L57-jimYoung L59-dinish
+L56-peter L57-peter L58-gilfoyle L59-jimYoung L61-dinish
+L58-peter L59-peter L60-gilfoyle L61-jimYoung L63-dinish
+L60-peter L61-peter L62-gilfoyle L63-jimYoung L65-dinish
+L62-peter L63-peter L64-gilfoyle L65-jimYoung L67-dinish
+L64-peter L65-peter L66-gilfoyle L67-jimYoung L69-dinish
+L66-peter L67-peter L68-gilfoyle L69-jimYoung L71-dinish
+L68-peter L69-peter L70-gilfoyle L71-jimYoung L73-dinish
+L70-peter L71-peter L72-gilfoyle L73-jimYoung L75-dinish
+L72-peter L73-peter L74-gilfoyle L75-jimYoung L77-dinish
+L74-peter L75-peter L76-gilfoyle L77-jimYoung L79-dinish
+L76-peter L77-peter L78-gilfoyle L79-jimYoung L81-dinish
+L78-peter L79-peter L80-gilfoyle L81-jimYoung L83-dinish
+L80-peter L81-peter L82-gilfoyle L83-jimYoung L85-dinish
+L82-peter L83-peter L84-gilfoyle L85-jimYoung L87-dinish
+L84-peter L85-peter L86-gilfoyle L87-jimYoung L89-dinish
+L86-peter L87-peter L88-gilfoyle L89-jimYoung L91-dinish
+L88-peter L89-peter L90-gilfoyle L91-jimYoung L93-dinish
+L90-peter L91-peter L92-gilfoyle L93-jimYoung L95-dinish
+L92-peter L93-peter L94-gilfoyle L95-jimYoung L97-dinish
+L94-peter L95-peter L96-gilfoyle L97-jimYoung L99-dinish
+L96-peter L97-peter L98-gilfoyle L99-jimYoung
+L98-peter L99-peter L100-gilfoyle
+L100-peter

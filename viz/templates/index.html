@@ -14,19 +14,15 @@
         <!-- The SVG will be loaded here -->
     </div>
 
-    {{range .Ants}}
-    <h3>{{.Name}}</h3>
+    {{- range .Ants }}
+    <span style="display: block; margin: 4px 0;">
+        <strong>{{ .Name }}</strong>: {{ range .Moves }}{{ . }} {{ end }}
+    </span>
+    {{- end }}
 
-    {{range .Moves}}
-    <p class="move">{{.}}</p>
-    {{end}}
-
-    {{end}}
 
     <script>
         // Load the SVG dynamically
-        console.log("{{ .Drawing }}")
-
         fetch("static/{{ .Drawing }}") // "simple.svg" "{{ .Drawing }}"
             .then(response => response.text()) // "response" is what fetch got, response.text() goes to the next then
             .then(svgContent => {
@@ -64,32 +60,9 @@
                     svgElement.appendChild(textElement);
                 });
 
-                // Find the coordinates of the "start" node
-                const startNodeTitle = Array.from(svgElement.querySelectorAll("title"))
-                    .find(el => el.textContent === "{{ .Start }}");
-
-                // Put red circle to start node
-                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                if (startNodeTitle) {
-                    const startNode = startNodeTitle.parentNode.querySelector("polygon");
-
-                    // Get initial coordinates for the start node
-                    const startCoords = startNode.getAttribute("points").split(" ")[0].split(",");
-                    const startX = parseFloat(startCoords[0]);
-                    const startY = parseFloat(startCoords[1]);
-
-                    // Set red dot attributes                    
-                    circle.setAttribute("r", "5");
-                    circle.setAttribute("fill", "red");
-                    circle.setAttribute("cx", startX);
-                    circle.setAttribute("cy", startY);
-                    circle.setAttribute("transform", transform); // Apply the main transform
-                    svgElement.appendChild(circle);
-                }
-
                 const turnLen = 1.5;
                 // Function that moves the red dot
-                function animateAlong(title) {
+                function animateAlong(title, antForm) {
                     if (title == "") {
                         return;
                     }
@@ -101,14 +74,14 @@
                     gsap.to(val, {
                         // Animate from distance 0 to the total distance
                         distance: path.getTotalLength(),
-                        repeat: 0, // Loops (-1 for infinite)
+                        repeat: 0, // Loops, (-1 for infinite)
                         duration: turnLen,
                         ease: "power1.inOut", // "none" for constant speed
                         onUpdate: () => {
                             // Query a point at the new distance value
                             const point = path.getPointAtLength(val.distance);
-                            circle.setAttribute('cx', point.x);
-                            circle.setAttribute('cy', point.y);
+                            antForm.setAttribute('cx', point.x);
+                            antForm.setAttribute('cy', point.y);
                         }
                     });
                 }
@@ -123,16 +96,40 @@
                     listOfMovelists.push(moovs);
                 }
 
-                (async function animateDot() {
-                    for (let i=0; i < listOfMovelists.length; i++) {
+                // Find the coordinates of the "start" node
+                const startNodeTitle = Array.from(svgElement.querySelectorAll("title"))
+                    .find(el => el.textContent === "{{ .Start }}");
 
-                        if (i == 0) {
-                            // create red dot / ant
-                        }
-                    
-                        for (const link of listOfMovelists[i]) {
-                            await new Promise(r => setTimeout(r, turnLen * 1500));
-                            await animateAlong(link);
+                // create list of graphics for ants, put all in starting room
+                let antForms = [];
+                for (let i = 0; i < listOfMovelists.length; i++) {
+                    // Put a red circle to start node
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    if (startNodeTitle) {
+                        const startNode = startNodeTitle.parentNode.querySelector("polygon");
+
+                        // Get initial coordinates for the start node
+                        const startCoords = startNode.getAttribute("points").split(" ")[0].split(",");
+                        const startX = parseFloat(startCoords[0]);
+                        const startY = parseFloat(startCoords[1]);
+
+                        // Set red dot attributes                    
+                        circle.setAttribute("r", "5");
+                        circle.setAttribute("fill", "red");
+                        circle.setAttribute("cx", startX);
+                        circle.setAttribute("cy", startY);
+                        circle.setAttribute("transform", transform); // Apply the main transform
+                        svgElement.appendChild(circle);
+                    }
+                    antForms.push(circle);
+                }
+
+                // Run the animations, with a small pause between turns
+                (async function animateDot() {
+                    for (let i = 0; i < listOfMovelists[0].length; i++) {
+                        await new Promise(r => setTimeout(r, turnLen * 1500));
+                        for (let j = 0; j < listOfMovelists.length; j++) {
+                            await animateAlong(listOfMovelists[j][i], antForms[j]);
                         }
                     }
                 })();
