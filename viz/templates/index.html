@@ -6,17 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ant Movement Animation</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.1/gsap.min.js"></script>
+    <style>
+        #svg-container svg {
+            width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
 
 <body>
 
-    <div id="svg-container">
+    <h2>lem-in visualizer</h2>
+
+    <div id="svg-container" style="width: 70vw;">
         <!-- The SVG will be loaded here -->
     </div>
 
+    <h3>Turns:</h3>
+    {{- range .Turns }}
+    <span style="display: block; margin: 2px 0;">
+        <strong>{{ index . 0 }}</strong>: {{ index . 1 }}
+    </span>
+    {{- end }}
+
+    <h3>Ants:</h3>
     {{- range .Ants }}
-    <span style="display: block; margin: 4px 0;">
-        <strong>{{ .Name }}</strong>: {{ range .Moves }}{{ . }} {{ end }}
+    <span style="display: block; margin: 2px 0;">
+        <!-- <strong>{{ .Name }}</strong>: {{ range .Moves }}{{ . }} {{ end }} -->
+        <strong>{{ .Name }}</strong>: {{ .Sequence }}
     </span>
     {{- end }}
 
@@ -133,11 +150,9 @@
                         }
                     }
                 })();
-
             })
 
     </script>
-
 </body>
 
 </html>

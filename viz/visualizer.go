@@ -12,13 +12,14 @@ import (
 )
 
 type ant struct {
-	Name  string   // a number
-	Moves []string // target room, max one per turn
+	Name     string   // a number
+	Moves    []string // target room, max one per turn
+	Sequence string
 }
 
 type PageData struct {
 	Ants    []ant
-	Turns   []string
+	Turns   [][2]string
 	Moves   [][]string
 	Drawing string
 	Start   string
@@ -87,7 +88,7 @@ func makeAnts(amount int, turns []string) {
 		ants = append(ants, ant{Name: strconv.Itoa(i + 1), Moves: make([]string, len(turns))})
 	}
 
-	for _, ant := range ants {
+	for h, ant := range ants {
 		prev := startGlob
 		for i := range ant.Moves {
 			allMovesThisTurn := strings.Fields(turns[i])
@@ -95,6 +96,11 @@ func makeAnts(amount int, turns []string) {
 				twoParts := strings.Split(move, "-")
 				if twoParts[0][1:] == ant.Name {
 					ant.Moves[i] = prev + "->" + twoParts[1]
+					if ants[h].Sequence == "" {
+						ants[h].Sequence += prev + " > " + twoParts[1]
+					} else {
+						ants[h].Sequence += " > " + twoParts[1]
+					}
 					prev = twoParts[1]
 				}
 			}
@@ -161,9 +167,14 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		antMoves = append(antMoves, ant.Moves)
 	}
 
+	doubleTurns := [][2]string{}
+	for i, t := range turnList {
+		doubleTurns = append(doubleTurns, [2]string{strconv.Itoa(i + 1), t})
+	}
+
 	data := PageData{
 		Ants:    ants,
-		Turns:   turnList,
+		Turns:   doubleTurns,
 		Moves:   antMoves,
 		Drawing: gvname,
 		Start:   startGlob,
