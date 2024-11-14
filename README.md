@@ -32,7 +32,7 @@ The other one runs a docker container with a texfile from the testcases/ folder 
 ./visualize_test.sh example00
 ```
 
-Navigate to [localhost:8080](localhost:8080) with a web browser to see an animation of the ants moving through the farm.
+Navigate to [localhost:8080](http://localhost:8080/) with a web browser to see an animation of the ants moving through the farm.
 
 
 ### Cleaning up after dockerizing
