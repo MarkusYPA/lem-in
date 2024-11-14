@@ -1,5 +1,5 @@
 # Use an official Golang image as the base image
-FROM golang:1.22 as builder
+FROM golang:1.22 AS builder
 WORKDIR /app
 
 # Copy go.mod and go.sum files and download dependencies
@@ -10,7 +10,7 @@ RUN go mod download
 COPY . .
 RUN go build -o leminviz .
 
-# Create the final image
+# For the second base image, use something that has a new enough version of glibc
 FROM debian:bookworm-slim
 
 # Install Graphviz in the final image

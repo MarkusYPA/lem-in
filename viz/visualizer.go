@@ -151,9 +151,13 @@ func createGVfile(start, end string, rooms, links []string) string {
 	err := os.WriteFile(nameGV, []byte(gvfile), 0644)
 	checkErr(err)
 
+	// Run GraphViz to create the .svg map of the ant farm
 	cmd := exec.Command("dot", "-Tsvg", nameGV, "-o", path+nameSVG)
 	_, err = cmd.Output()
-	checkErr(err)
+	if err != nil {
+		fmt.Println(err.Error())
+		fmt.Println("Unable to create static/graph.svg, use a compatible premade graph from premadegraphs/")
+	}
 
 	return nameSVG
 }

@@ -3,39 +3,29 @@ digraph G {
     pad=0.5;
     edge [arrowhead=none];
 
-    start [shape=box];
-    end [shape=box];
+    1 [shape=box];
+    0 [shape=box];
 
-    start [fixedsize=true height= 0, width=0 color="transparent"];
+    1 [fixedsize=true height= 0, width=0 color="transparent"];
+    2 [fixedsize=true height= 0, width=0 color="transparent"];
+    3 [fixedsize=true height= 0, width=0 color="transparent"];
+    4 [fixedsize=true height= 0, width=0 color="transparent"];
+    5 [fixedsize=true height= 0, width=0 color="transparent"];
+    6 [fixedsize=true height= 0, width=0 color="transparent"];
+    7 [fixedsize=true height= 0, width=0 color="transparent"];
     0 [fixedsize=true height= 0, width=0 color="transparent"];
-    o [fixedsize=true height= 0, width=0 color="transparent"];
-    n [fixedsize=true height= 0, width=0 color="transparent"];
-    e [fixedsize=true height= 0, width=0 color="transparent"];
-    t [fixedsize=true height= 0, width=0 color="transparent"];
-    E [fixedsize=true height= 0, width=0 color="transparent"];
-    a [fixedsize=true height= 0, width=0 color="transparent"];
-    m [fixedsize=true height= 0, width=0 color="transparent"];
-    h [fixedsize=true height= 0, width=0 color="transparent"];
-    A [fixedsize=true height= 0, width=0 color="transparent"];
-    c [fixedsize=true height= 0, width=0 color="transparent"];
-    k [fixedsize=true height= 0, width=0 color="transparent"];
-    end [fixedsize=true height= 0, width=0 color="transparent"];
+    #another [fixedsize=true height= 0, width=0 color="transparent"];
 
-    start -> t;
-    n -> e;
-    a -> m;
-    A -> c;
-    0 -> o;
-    E -> a;
-    k -> end;
-    start -> h;
-    o -> n;
-    m -> end;
-    t -> E;
-    start -> 0;
-    h -> A;
-    e -> end;
-    c -> k;
-    n -> m;
-    h -> n;
+    4 -> 0
+    6 -> 0
+    1 -> 3;
+    3 -> 4
+    2 -> 5
+    3 -> 5;
+    4 -> 2;
+    1 -> 2
+    7 -> 6;
+    7 -> 2;
+    7 -> 4;
+    5 -> 6
 }
