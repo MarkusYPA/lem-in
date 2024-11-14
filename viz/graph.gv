@@ -3,22 +3,39 @@ digraph G {
     pad=0.5;
     edge [arrowhead=none];
 
-    richard [shape=box];
-    peter [shape=box];
+    start [shape=box];
+    end [shape=box];
 
-    richard [fixedsize=true height= 0, width=0 color="transparent"];
-    gilfoyle [fixedsize=true height= 0, width=0 color="transparent"];
-    erlich [fixedsize=true height= 0, width=0 color="transparent"];
-    dinish [fixedsize=true height= 0, width=0 color="transparent"];
-    jimYoung [fixedsize=true height= 0, width=0 color="transparent"];
-    peter [fixedsize=true height= 0, width=0 color="transparent"];
+    start [fixedsize=true height= 0, width=0 color="transparent"];
+    0 [fixedsize=true height= 0, width=0 color="transparent"];
+    o [fixedsize=true height= 0, width=0 color="transparent"];
+    n [fixedsize=true height= 0, width=0 color="transparent"];
+    e [fixedsize=true height= 0, width=0 color="transparent"];
+    t [fixedsize=true height= 0, width=0 color="transparent"];
+    E [fixedsize=true height= 0, width=0 color="transparent"];
+    a [fixedsize=true height= 0, width=0 color="transparent"];
+    m [fixedsize=true height= 0, width=0 color="transparent"];
+    h [fixedsize=true height= 0, width=0 color="transparent"];
+    A [fixedsize=true height= 0, width=0 color="transparent"];
+    c [fixedsize=true height= 0, width=0 color="transparent"];
+    k [fixedsize=true height= 0, width=0 color="transparent"];
+    end [fixedsize=true height= 0, width=0 color="transparent"];
 
-    richard -> dinish;
-    dinish -> jimYoung;
-    richard -> gilfoyle;
-    gilfoyle -> peter;
-    gilfoyle -> erlich;
-    richard -> erlich;
-    erlich -> jimYoung;
-    jimYoung -> peter;
+    start -> t;
+    n -> e;
+    a -> m;
+    A -> c;
+    0 -> o;
+    E -> a;
+    k -> end;
+    start -> h;
+    o -> n;
+    m -> end;
+    t -> E;
+    start -> 0;
+    h -> A;
+    e -> end;
+    c -> k;
+    n -> m;
+    h -> n;
 }
