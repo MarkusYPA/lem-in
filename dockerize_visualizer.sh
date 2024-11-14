@@ -1,4 +1,5 @@
 #!/bin/bash
 
 # build visualizer docker image
-viz/docker build -t leminvisualizer .
+(cd viz && docker build -t leminvisualizer .)
+
