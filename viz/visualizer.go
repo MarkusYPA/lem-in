@@ -72,7 +72,7 @@ func parseInput(input []string) (string, string, []string, []string, []string) {
 				end = strings.Fields(input[i+1])[0]
 			}
 		} else {
-			if line[0:2] != "##" && line[0] == 'L' && strings.Contains(line, "-") {
+			if len(line) > 1 && line[0:2] != "##" && line[0] == 'L' && strings.Contains(line, "-") {
 				turns = append(turns, line)
 			}
 		}
