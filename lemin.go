@@ -8,7 +8,7 @@ import (
 type room struct {
 	Name      string
 	Coords    [2]int
-	Occupants []int    // ant names are integers
+	Occupants map[int]bool
 	Links     []string // neighbouring room names
 	Role      string   // "start", "normal" or "end"
 }
@@ -42,7 +42,8 @@ func getStartInd(rs []room) int {
 func populateStart(rooms *[]room, ants []ant) {
 	start := &(*rooms)[getStartInd(*rooms)]
 	for _, a := range ants {
-		start.Occupants = append(start.Occupants, a.Name)
+		//start.Occupants = append(start.Occupants, a.Name)
+		start.Occupants[a.Name] = true
 	}
 }
 
@@ -68,7 +69,6 @@ func main() {
 	// find all routes connecting "start" to "end" and all unique combinations of non-crossing routes
 	var routes []route
 	findRoutes(rooms[getStartInd(rooms)], route{}, &routes, &rooms)
-	//fmt.Println("Routes", time.Now().Format("05.00"))
 	sortRoutes(&routes)
 	separateRoutes := getSepRoutes(routes)
 
@@ -83,22 +83,14 @@ func main() {
 	*/
 
 	optimals := reduceOptimals([][]route{shortCombo(separateRoutes, routes), longCombo(separateRoutes), bestScoreCombo(separateRoutes)})
-	//fmt.Println(time.Now().Format("05.00"), "Optimals")
 	setsOfAnts := makeAnts(optimals, nAnts)
-	//fmt.Println(time.Now().Format("05.00"), "Ants made")
 	assignRoutes(optimals, &setsOfAnts)
-	//fmt.Println(time.Now().Format("05.00"), "Assigned")
 	_, optI := bestSolution(optimals, setsOfAnts)
-	//fmt.Println(time.Now().Format("05.00"), "Best")
 	populateStart(&rooms, setsOfAnts[optI])
-	//fmt.Println(time.Now().Format("05.00"), "Populated")
 
 	// Move ants and save the moves
 	turns := moveAnts(&rooms, setsOfAnts[optI])
-	//fmt.Println(time.Now().Format("05.00"), "Moved")
 
 	// Print out the file contents and the moves
 	printSolution(string(in), turns)
-	//fmt.Println()
-	//fmt.Println(len(turns), "turns")
 }

@@ -69,6 +69,7 @@ func getStartValues(s string) (int, []room) {
 				handleError(fmt.Errorf("ERROR: invalid data format, " + l))
 			}
 
+			thisRoom.Occupants = make(map[int]bool)
 			rooms = append(rooms, thisRoom)
 		}
 

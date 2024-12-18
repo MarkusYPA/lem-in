@@ -19,17 +19,12 @@ func makeAnts(optimals [][]route, n int) [][]ant {
 
 // assignRoutes gives each ant a route to follow
 func assignRoutes(optimals [][]route, setsOfAnts *[][]ant) {
-	//wgCombos := sync.WaitGroup{}
 	for i, routeCombo := range optimals {
-		//wgCombos.Add(1)
-		//go func() {
 		// how many ants on each route in this combo
 		onRoutes := make([]int, len(routeCombo))
-		//wgAnts := sync.WaitGroup{}
+
 		// loop over the set of ants pertaining to the combo of routes
 		for j := 0; j < len((*setsOfAnts)[i]); j++ {
-			//wgAnts.Add(1)
-			//go func() {
 			// find the shortest route for this ant (length = route length + ants already taking it)
 			shortest := 0
 			shortD := len(routeCombo[0]) + onRoutes[0]
@@ -41,14 +36,8 @@ func assignRoutes(optimals [][]route, setsOfAnts *[][]ant) {
 			}
 			(*setsOfAnts)[i][j].Route = routeCombo[shortest]
 			onRoutes[shortest]++
-			//wgAnts.Done()
-			//}()
 		}
-		//wgAnts.Wait()
-		//wgCombos.Done()
-		//}()
 	}
-	//wgCombos.Wait()
 }
 
 // getEndInd returns the index of the "end" room
@@ -78,10 +67,9 @@ func nextIsOk(a ant, rooms *[]room, usedLinks [][2]string) (bool, *room, *room) 
 	var curr *room
 	var next *room
 	for i, rm := range *rooms {
-		for _, occ := range rm.Occupants {
-			if occ == a.Name {
-				curr = &(*rooms)[i]
-			}
+		if _, ok := rm.Occupants[a.Name]; ok {
+			curr = &(*rooms)[i]
+			//break?
 		}
 	}
 	if curr.Role == "end" {
@@ -101,49 +89,6 @@ func nextIsOk(a ant, rooms *[]room, usedLinks [][2]string) (bool, *room, *room) 
 	return len(next.Occupants) < 1 || next.Role == "end", curr, next
 }
 
-// removeFromRoom removes ant a from the lists of occupants of all rooms and returns the current and next rooms
-func removeFromRoom(rms []room, a ant) (room, room, []room) {
-	roomsOut := []room{}
-	var curr room
-	for _, rm := range rms {
-		nuRm := rm
-		nuRm.Occupants = nil
-		for _, occ := range rm.Occupants {
-			if occ != a.Name {
-				nuRm.Occupants = append(nuRm.Occupants, occ)
-			} else {
-				curr = rms[findRoom(rms, rm.Name)]
-			}
-		}
-		roomsOut = append(roomsOut, nuRm)
-	}
-	next := nextRoom(&rms, curr, a)
-	return curr, *next, roomsOut
-}
-
-func removeAntFromRoom(thisRoom *room, a ant) {
-	//before := time.Now()
-	newOccupants := []int{}
-	for _, oc := range thisRoom.Occupants {
-		//fmt.Println(time.Since(before), "0")
-		if oc != a.Name {
-			newOccupants = append(newOccupants, oc)
-		}
-		//fmt.Println(time.Since(before), "1")
-		//before = time.Now()
-	}
-	thisRoom.Occupants = newOccupants
-}
-
-// addToRoom adds an ant to the list of occupants in a room
-func addToRoom(rms *[]room, nxt *room, a ant) {
-	for i := 0; i < len(*rms); i++ {
-		if (*rms)[i].Name == nxt.Name {
-			(*rms)[i].Occupants = append((*rms)[i].Occupants, a.Name)
-		}
-	}
-}
-
 // moveAnts moves the ants across the farm and returns the commands to do so
 func moveAnts(rms *[]room, ants []ant) []string {
 	turns := []string{}
@@ -157,9 +102,9 @@ func moveAnts(rms *[]room, ants []ant) []string {
 		for i := 0; i < len(ants); i++ {
 			NextOk, currentRoom, nextRoom := nextIsOk(ants[i], rms, linksUsed)
 			if NextOk {
-				removeAntFromRoom(currentRoom, ants[i])
+				delete(currentRoom.Occupants, ants[i].Name)
 				linksUsed = append(linksUsed, [2]string{currentRoom.Name, nextRoom.Name}) // mark this link as used
-				addToRoom(rms, nextRoom, ants[i])
+				nextRoom.Occupants[ants[i].Name] = true
 
 				// add move to current turn
 				moves += "L" + strconv.Itoa(ants[i].Name) + "-" + nextRoom.Name + " "
