@@ -1,0 +1,5 @@
+
+The visualizer needs the main program's output as its input.
+
+To pipe output from the parent folder:
+(cd .. && go run . testcases/example01.txt) | go run .

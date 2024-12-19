@@ -3,6 +3,11 @@ package main
 import (
 	"fmt"
 	"reflect"
+	"sync"
+)
+
+var (
+	routesCount int
 )
 
 // isOnRoute tells if a room is on a slice
@@ -35,6 +40,12 @@ func findRoutes(curRoom room, curRoute route, routes *[]route, rooms *[]room) {
 		toSave := make(route, len(curRoute))
 		copy(toSave, curRoute) // copy values to a new route to avoid pointer problems
 		*routes = append(*routes, toSave)
+
+		routesCount++
+		/* 		if routesCount%100000 == 0 {
+			fmt.Println(time.Now().Format("04.05.00"), routesCount, "routes found by now")
+		} */
+
 		return
 	}
 
@@ -69,15 +80,16 @@ func getSepRoutes(rts []route) [][]route {
 		return [][]route{rts}
 	}
 
+	sepRts := make([][]route, len(rts)-1)
+
 	// For each route, make a slice that includes that one and any of the next routes that don't
 	// share any intermediary rooms. Many will be 1 long.
-	sepRts := make([][]route, len(rts)-1)
-	for i := 0; i < len(rts)-1; i++ {
+	/* 	for i := 0; i < len(rts)-1; i++ {
 		sepRts[i] = append(sepRts[i], rts[i])
 		for j := i + 1; j < len(rts); j++ {
 			separate := true
 			for _, foundRt := range sepRts[i] {
-				if !areSeparate(foundRt, rts[j]) {
+				if !areSeparate(&foundRt, &rts[j]) {
 					separate = false
 				}
 			}
@@ -85,15 +97,42 @@ func getSepRoutes(rts []route) [][]route {
 				sepRts[i] = append(sepRts[i], rts[j])
 			}
 		}
+	} */
+
+	// Goroutines for faster checks of separation in complicated maps
+	routeMU := sync.Mutex{}
+	wg := sync.WaitGroup{}
+	for i := 0; i < len(rts)-1; i++ {
+		wg.Add(1)
+		go func() {
+			routeMU.Lock()
+			sepRts[i] = append(sepRts[i], rts[i])
+			routeMU.Unlock()
+			for j := i + 1; j < len(rts); j++ {
+				separate := true
+				for _, foundRt := range sepRts[i] {
+					if !areSeparate(&foundRt, &rts[j]) {
+						separate = false
+					}
+				}
+				if separate {
+					routeMU.Lock()
+					sepRts[i] = append(sepRts[i], rts[j])
+					routeMU.Unlock()
+				}
+			}
+			wg.Done()
+		}()
 	}
+	wg.Wait()
 	return sepRts
 }
 
 // areSeparate tells if two routes share intermediary rooms
-func areSeparate(rt1, rt2 route) bool {
+func areSeparate(rt1, rt2 *route) bool {
 	// compare all rooms except start and end
-	for _, room1 := range rt1[1 : len(rt1)-1] {
-		for _, room2 := range rt2[1 : len(rt2)-1] {
+	for _, room1 := range (*rt1)[1 : len(*rt1)-1] {
+		for _, room2 := range (*rt2)[1 : len(*rt2)-1] {
 			if room1 == room2 {
 				return false
 			}

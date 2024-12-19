@@ -69,7 +69,6 @@ func nextIsOk(a ant, rooms *[]room, usedLinks [][2]string) (bool, *room, *room) 
 	for i, rm := range *rooms {
 		if _, ok := rm.Occupants[a.Name]; ok {
 			curr = &(*rooms)[i]
-			//break?
 		}
 	}
 	if curr.Role == "end" {
@@ -92,22 +91,28 @@ func nextIsOk(a ant, rooms *[]room, usedLinks [][2]string) (bool, *room, *room) 
 // moveAnts moves the ants across the farm and returns the commands to do so
 func moveAnts(rms *[]room, ants []ant) []string {
 	turns := []string{}
+	antsAtEnd := 0
 
 	// move ants until all are in the last room
-	for len((*rms)[getEndInd(*rms)].Occupants) < len(ants) {
+	for antsAtEnd < len(ants) {
 		moves := ""
 		linksUsed := [][2]string{}
 
 		// try to move each ant
 		for i := 0; i < len(ants); i++ {
-			NextOk, currentRoom, nextRoom := nextIsOk(ants[i], rms, linksUsed)
-			if NextOk {
-				delete(currentRoom.Occupants, ants[i].Name)
-				linksUsed = append(linksUsed, [2]string{currentRoom.Name, nextRoom.Name}) // mark this link as used
-				nextRoom.Occupants[ants[i].Name] = true
-
-				// add move to current turn
-				moves += "L" + strconv.Itoa(ants[i].Name) + "-" + nextRoom.Name + " "
+			if !ants[i].atEnd {
+				NextOk, currentRoom, nextRoom := nextIsOk(ants[i], rms, linksUsed)
+				if NextOk {
+					delete(currentRoom.Occupants, ants[i].Name)
+					linksUsed = append(linksUsed, [2]string{currentRoom.Name, nextRoom.Name}) // mark this link as used
+					nextRoom.Occupants[ants[i].Name] = true
+					if nextRoom.Role == "end" {
+						ants[i].atEnd = true
+						antsAtEnd++
+					}
+					// add move to current turn
+					moves += "L" + strconv.Itoa(ants[i].Name) + "-" + nextRoom.Name + " "
+				}
 			}
 		}
 

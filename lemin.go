@@ -16,6 +16,7 @@ type room struct {
 type ant struct {
 	Name  int
 	Route route
+	atEnd bool
 }
 
 type route []string
@@ -65,12 +66,16 @@ func main() {
 	// read and save the number of ants and information about the rooms
 	nAnts, rooms := getStartValues(removeCarRet(string(in)))
 	verifyRooms(rooms)
-
+	//fmt.Println(time.Now().Format("04.05.00"), "Rooms verified")
 	// find all routes connecting "start" to "end" and all unique combinations of non-crossing routes
 	var routes []route
 	findRoutes(rooms[getStartInd(rooms)], route{}, &routes, &rooms)
+	//fmt.Println(time.Now().Format("04.05.00"), "All", len(routes), "Routes Found")
 	sortRoutes(&routes)
+	//fmt.Println(time.Now().Format("04.05.00"), "Routes Sorted")
+
 	separateRoutes := getSepRoutes(routes)
+	//fmt.Println(time.Now().Format("04.05.00"), "Separate Routes")
 
 	/*
 		Two crossing routes work effectively as one single route because of the
@@ -83,14 +88,21 @@ func main() {
 	*/
 
 	optimals := reduceOptimals([][]route{shortCombo(separateRoutes, routes), longCombo(separateRoutes), bestScoreCombo(separateRoutes)})
+	//fmt.Println(time.Now().Format("04.05.00"), "Optimals done")
 	setsOfAnts := makeAnts(optimals, nAnts)
+	//fmt.Println(time.Now().Format("04.05.00"), "Made ants")
 	assignRoutes(optimals, &setsOfAnts)
+	//fmt.Println(time.Now().Format("04.05.00"), "Routes assigned")
 	_, optI := bestSolution(optimals, setsOfAnts)
+	//fmt.Println(time.Now().Format("04.05.00"), "Best found")
 	populateStart(&rooms, setsOfAnts[optI])
+	//fmt.Println(time.Now().Format("04.05.00"), "Start populated")
 
 	// Move ants and save the moves
 	turns := moveAnts(&rooms, setsOfAnts[optI])
+	//fmt.Println(time.Now().Format("04.05.00"), "Moved")
 
 	// Print out the file contents and the moves
 	printSolution(string(in), turns)
+	//fmt.Println(len(turns), "turns")
 }
