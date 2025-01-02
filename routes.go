@@ -3,11 +3,6 @@ package main
 import (
 	"fmt"
 	"reflect"
-	"sync"
-)
-
-var (
-	routesCount int
 )
 
 // isOnRoute tells if a room is on a slice
@@ -41,11 +36,6 @@ func findRoutes(curRoom room, curRoute route, routes *[]route, rooms *[]room) {
 		copy(toSave, curRoute) // copy values to a new route to avoid pointer problems
 		*routes = append(*routes, toSave)
 
-		routesCount++
-		/* 		if routesCount%100000 == 0 {
-			fmt.Println(time.Now().Format("04.05.00"), routesCount, "routes found by now")
-		} */
-
 		return
 	}
 
@@ -74,60 +64,6 @@ func sortRoutes(rts *[]route) {
 	}
 }
 
-// getSepRoutes creates slices of route combinations where the routes don't share rooms on the way from start to end
-func getSepRoutes(rts []route) [][]route {
-	if len(rts) == 1 {
-		return [][]route{rts}
-	}
-
-	sepRts := make([][]route, len(rts)-1)
-
-	// For each route, make a slice that includes that one and any of the next routes that don't
-	// share any intermediary rooms. Many will be 1 long.
-	/* 	for i := 0; i < len(rts)-1; i++ {
-		sepRts[i] = append(sepRts[i], rts[i])
-		for j := i + 1; j < len(rts); j++ {
-			separate := true
-			for _, foundRt := range sepRts[i] {
-				if !areSeparate(&foundRt, &rts[j]) {
-					separate = false
-				}
-			}
-			if separate {
-				sepRts[i] = append(sepRts[i], rts[j])
-			}
-		}
-	} */
-
-	// Goroutines for faster checks of separation in complicated maps
-	routeMU := sync.Mutex{}
-	wg := sync.WaitGroup{}
-	for i := 0; i < len(rts)-1; i++ {
-		wg.Add(1)
-		go func() {
-			routeMU.Lock()
-			sepRts[i] = append(sepRts[i], rts[i])
-			routeMU.Unlock()
-			for j := i + 1; j < len(rts); j++ {
-				separate := true
-				for _, foundRt := range sepRts[i] {
-					if !areSeparate(&foundRt, &rts[j]) {
-						separate = false
-					}
-				}
-				if separate {
-					routeMU.Lock()
-					sepRts[i] = append(sepRts[i], rts[j])
-					routeMU.Unlock()
-				}
-			}
-			wg.Done()
-		}()
-	}
-	wg.Wait()
-	return sepRts
-}
-
 // areSeparate tells if two routes share intermediary rooms
 func areSeparate(rt1, rt2 *route) bool {
 	// compare all rooms except start and end
@@ -141,62 +77,93 @@ func areSeparate(rt1, rt2 *route) bool {
 	return true
 }
 
-// shortCombo returns the longest combination of routes that includes at least one of the shortest routes
-func shortCombo(seps [][]route, routes []route) []route {
-	shortestOfAll := len(routes[0])
-	shortComb := seps[0]
+// findSeparates recurs through available routes to create combinations of separate routes
+func findSeparates(routes, combo []route, allCombos *[][]route, ind int) []route {
+
+	// add this route to the combo
+	combo = append(combo, routes[ind])
+
+	// only look at routes after this one to avoid duplicates in different order
+	routes = routes[ind+1:]
+
+	// filter out the ones that are no longer separate
+	nuRoutes := []route{}
+	for _, potentialRoute := range routes {
+		separate := true
+		for _, foundRoute := range combo {
+			if !areSeparate(&foundRoute, &potentialRoute) {
+				separate = false
+			}
+		}
+		if separate {
+			nuRoutes = append(nuRoutes, potentialRoute)
+		}
+	}
+
+	// Grow the combo from each available route and add to all combinations
+	for i := range nuRoutes {
+		*allCombos = append(*allCombos, findSeparates(nuRoutes, combo, allCombos, i))
+	}
+	return combo
+}
+
+// shortCombos returns all the longest combinations of routes that includes at least one of the shortest routes
+func shortCombos(seps [][]route, routes []route) [][]route {
+
+	shortestRoute := len(routes[0])
+	longestCombo := 0
 	for _, combo := range seps {
-		// Looking for a combo with the same length shortest and more routes
-		if len(combo[0]) == shortestOfAll && len(combo) > len(seps[0]) {
-			shortComb = combo
+		// First route in a combo is always the shortest
+		if len(combo[0]) == shortestRoute && len(combo) > longestCombo {
+			longestCombo = len(combo)
 		}
 	}
-	return shortComb
-}
 
-// longCombo returns the longest combination of routes. In case of tie,
-// it returns the one with the fewest links
-func longCombo(seps [][]route) []route {
-	longest := seps[0]
-	for _, comb := range seps {
-		if len(comb) > len(longest) {
-			longest = comb
-		}
-		if len(comb) == len(longest) { // Which one has fewer links (steps)
-			var links1, links2 int
-			for _, rt := range comb {
-				links1 += len(rt) - 1
-			}
-			for _, rt := range longest {
-				links2 += len(rt) - 1
-			}
-			if links1 < links2 {
-				longest = comb
-			}
-		}
-	}
-	return longest
-}
-
-// bestScoreCombo returns the combination of routes with the shortest average length
-func bestScoreCombo(seps [][]route) []route {
-	best := seps[0]
-	bestScore := linksToRoutesScore(best)
+	shorts := [][]route{}
 	for _, combo := range seps {
-		if linksToRoutesScore(combo) < bestScore {
-			best = combo
+		if len(combo[0]) == shortestRoute && len(combo) == longestCombo {
+			shorts = append(shorts, combo)
 		}
 	}
-	return best
+
+	return shorts
 }
 
-// linksToRoutesScore calculates the links to routes ratio
-func linksToRoutesScore(comb []route) int {
-	var links int
-	for _, rt := range comb {
-		links += len(rt) - 1
+func comboAvgLength(combo []route) float64 {
+	lens := 0.0
+	for _, route := range combo {
+		lens += float64(len(route))
 	}
-	return links / len(comb)
+	return lens / float64(len(combo))
+}
+
+// longCombos returns all the longest combinations of routes with the lowest average lenght
+func longCombos(seps [][]route) [][]route {
+	longestCombo := 0
+	var avgLen float64
+	for _, combo := range seps {
+		if len(combo) > longestCombo {
+			longestCombo = len(combo)
+			avgLen = comboAvgLength(combo)
+		}
+	}
+
+	// Find the lowest average length in the longest combinations
+	for _, combo := range seps {
+		if len(combo) == longestCombo && comboAvgLength(combo) <= avgLen {
+			avgLen = comboAvgLength(combo)
+		}
+	}
+
+	longs := [][]route{}
+	for _, combo := range seps {
+		if len(combo) == longestCombo && comboAvgLength(combo) == avgLen {
+			longs = append(longs, combo)
+		}
+	}
+
+	return longs
+
 }
 
 // reduceOptimals removes duplicates

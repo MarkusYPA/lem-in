@@ -1,0 +1,4 @@
+
+x Two by two optimal solutions
+x Rewrite func separate routes to be recursive
+- goroutines to find separates faster. Or not.
