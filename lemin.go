@@ -81,7 +81,8 @@ func main() {
 	verifyRooms(rooms)
 	// find all routes connecting "start" to "end" and all unique combinations of non-crossing routes
 	var routes []route
-	findRoutes(rooms[getStartInd(rooms)], route{}, &routes, &rooms)
+	startRoom := rooms[getStartInd(rooms)]
+	findRoutes(startRoom, route{}, &routes, &rooms)
 	sortRoutes(&routes)
 
 	// Find all combinations of non-crossing routes
@@ -89,7 +90,6 @@ func main() {
 	for i := range routes {
 		combosOfSeparates = append(combosOfSeparates, findSeparates(routes, []route{}, &combosOfSeparates, i))
 	}
-
 	/*
 		Two crossing routes work effectively as one single route because of the
 		bottleneck, so we focus only on combinations of separate routes

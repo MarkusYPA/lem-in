@@ -16,9 +16,9 @@ func isOnRoute(route route, room room) bool {
 }
 
 // findRoom returns the index of a room on a slice by room name
-func findRoom(rms []room, nm string) int {
-	for i, r := range rms {
-		if r.Name == nm {
+func findRoom(rooms []room, name string) int {
+	for i, r := range rooms {
+		if r.Name == name {
 			return i
 		}
 	}
@@ -35,15 +35,14 @@ func findRoutes(curRoom room, curRoute route, routes *[]route, rooms *[]room) {
 		toSave := make(route, len(curRoute))
 		copy(toSave, curRoute) // copy values to a new route to avoid pointer problems
 		*routes = append(*routes, toSave)
-
 		return
 	}
 
 	// add new room to current route and proceed
 	if !isOnRoute(curRoute, curRoom) {
 		curRoute = append(curRoute, curRoom.Name)
-		for _, ln := range curRoom.Links {
-			nextRoom := (*rooms)[findRoom(*rooms, ln)]
+		for _, link := range curRoom.Links {
+			nextRoom := (*rooms)[findRoom(*rooms, link)]
 			findRoutes(nextRoom, curRoute, routes, rooms)
 		}
 	}
@@ -78,10 +77,10 @@ func areSeparate(rt1, rt2 *route) bool {
 }
 
 // findSeparates recurs through available routes to create combinations of separate routes
-func findSeparates(routes, combo []route, allCombos *[][]route, ind int) []route {
+func findSeparates(routes, curCombo []route, combosOfSeparates *[][]route, ind int) []route {
 
-	// add this route to the combination
-	combo = append(combo, routes[ind])
+	// add this route to the current combination
+	curCombo = append(curCombo, routes[ind])
 
 	// only look at routes after this one to avoid duplicates in different order
 	routes = routes[ind+1:]
@@ -90,7 +89,7 @@ func findSeparates(routes, combo []route, allCombos *[][]route, ind int) []route
 	newRoutes := []route{}
 	for _, potentialRoute := range routes {
 		separate := true
-		for _, foundRoute := range combo {
+		for _, foundRoute := range curCombo {
 			if !areSeparate(&foundRoute, &potentialRoute) {
 				separate = false
 			}
@@ -102,10 +101,10 @@ func findSeparates(routes, combo []route, allCombos *[][]route, ind int) []route
 
 	// Grow the combo from each available route and add to all combinations
 	for i := range newRoutes {
-		*allCombos = append(*allCombos, findSeparates(newRoutes, combo, allCombos, i))
+		*combosOfSeparates = append(*combosOfSeparates, findSeparates(newRoutes, curCombo, combosOfSeparates, i))
 	}
 
-	return combo
+	return curCombo
 }
 
 // comboAvgLength calculates the average length of a slice of routes
@@ -118,20 +117,20 @@ func comboAvgLength(combo []route) float64 {
 }
 
 // shortCombos returns all the longest combinations of routes that includes at least one of the shortest routes
-func shortCombos(seps [][]route, routes []route) [][]route {
+func shortCombos(combosOfSeparates [][]route, routes []route) [][]route {
 
-	shortestRoute := len(routes[0])
+	shortestLength := len(routes[0])
 	longestComboWithShortest := 0
-	for _, combo := range seps {
+	for _, combo := range combosOfSeparates {
 		// First route in a combo is always the shortest
-		if len(combo[0]) == shortestRoute && len(combo) > longestComboWithShortest {
+		if len(combo[0]) == shortestLength && len(combo) > longestComboWithShortest {
 			longestComboWithShortest = len(combo)
 		}
 	}
 
 	shorts := [][]route{}
-	for _, combo := range seps {
-		if len(combo[0]) == shortestRoute && len(combo) == longestComboWithShortest {
+	for _, combo := range combosOfSeparates {
+		if len(combo[0]) == shortestLength && len(combo) == longestComboWithShortest {
 			shorts = append(shorts, combo)
 		}
 	}
@@ -140,7 +139,7 @@ func shortCombos(seps [][]route, routes []route) [][]route {
 }
 
 // lowAverages finds the lowest average length combinations for each number of routes
-func lowAverages(seps [][]route) [][]route {
+func lowAverages(combosOfSeparates [][]route) [][]route {
 
 	combosByLength := make(map[int][][]route)
 	bestCombosByLength := make(map[int][][]route)
@@ -148,7 +147,7 @@ func lowAverages(seps [][]route) [][]route {
 	lowAvgs := [][]route{}
 
 	// Organize combinations by number of routes
-	for _, combo := range seps {
+	for _, combo := range combosOfSeparates {
 		combosByLength[len(combo)] = append(combosByLength[len(combo)], combo)
 		if len(combo) > longestCombo {
 			longestCombo = len(combo)
@@ -170,10 +169,10 @@ func lowAverages(seps [][]route) [][]route {
 		}
 	}
 
-	// Add all longest ones since longest is always the best for a large amount of ants
+	// Add the best longest ones since longest is always the best for a large amount of ants
 	lowAvgs = append(lowAvgs, bestCombosByLength[longestCombo]...)
 
-	// Remove worse solutions: if number of routes is lower and avg length is equal or greater
+	// Add shorter combinations if average length is lower
 	benchmark := comboAvgLength(bestCombosByLength[longestCombo][0])
 	for i := longestCombo - 1; i > 0; i-- {
 		for _, combo := range bestCombosByLength[i] {
@@ -227,32 +226,32 @@ func removeRedundant(optimals [][]route) [][]route {
 	// remove functionally similar and functionally subsets (same length routes)
 	functionalUniques := [][]route{uniques[0]}
 	for _, uniq := range uniques {
-		allowed := true
+		found := true
 		for _, fUniq := range functionalUniques {
 			if isSubset(fUniq, uniq) {
-				allowed = false
+				found = false
 				break
 			}
 		}
-		if allowed {
+		if found {
 			functionalUniques = append(functionalUniques, uniq)
 		}
 	}
 
-	return uniques
+	return functionalUniques
 }
 
 // bestSolution measures known optimal route combinations for the given number
 // of ants and returns the shortest one and its index
-func bestSolution(opts [][]route, sAnts [][]ant) ([]route, int) {
-	if len(opts) == 1 {
-		return opts[0], 0
+func bestSolution(optimals [][]route, sAnts [][]ant) ([]route, int) {
+	if len(optimals) == 1 {
+		return optimals[0], 0
 	}
 
-	longestRoutes := make([]int, len(opts))
-	for i, routes := range opts {
+	longestRoutes := make([]int, len(optimals))
+	for i, combo := range optimals {
 		longest := 0
-		for _, rt := range routes {
+		for _, rt := range combo {
 			// count ants on this route
 			ants := 0
 			for _, ant := range sAnts[i] {
@@ -271,13 +270,13 @@ func bestSolution(opts [][]route, sAnts [][]ant) ([]route, int) {
 	}
 
 	// find which optimal route is the quickest for these ants
-	quickest := opts[0]
+	quickest := optimals[0]
 	quickI := 0
 	shortestLong := longestRoutes[0]
 	for i, n := range longestRoutes {
 		if n < shortestLong {
 			shortestLong = n
-			quickest = opts[i]
+			quickest = optimals[i]
 			quickI = i
 		}
 	}

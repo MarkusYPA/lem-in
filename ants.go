@@ -14,7 +14,6 @@ func makeAnts(optimals [][]route, n int) [][]ant {
 		}
 	}
 	return setsOfAnts
-
 }
 
 // assignRoutes gives each ant a route to follow
