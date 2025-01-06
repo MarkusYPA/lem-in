@@ -40,16 +40,6 @@ func assignRoutes(optimals [][]route, setsOfAnts *[][]ant) {
 	}
 }
 
-// getEndInd returns the index of the "end" room
-func getEndInd(rs []room) int {
-	for i, r := range rs {
-		if r.Role == "end" {
-			return i
-		}
-	}
-	return -1
-}
-
 // nextRoom finds the next room on an ant's route
 func nextRoom(rms *[]room, curr room, a ant) *room {
 	var next *room

@@ -1,4 +1,4 @@
-210
+6
 #
 # This maze is constructed to have three solutions that completely
 # prevent each other:
@@ -11,38 +11,38 @@
 # Ants, best solutions and number of routes taken:
 # 1 ant, 5 turns, 1 route
 # 4 ants, 7 turns, 2 routes
-# 12 ants, 11 turns, 2 routes
+# 14 ants, 12 turns, 2 routes
 # 15 ants, 13 turns, 3 routes
 # 18 ants, 14 turns, 3 routes
 #
 ##start
-start 0 0
-d0 0 0
-d1 0 0
-a2 0 0
-b2 0 0
-c2 0 0
-d2 0 0
-a3 0 0
-b3 0 0
-c3 0 0
-d3 0 0
-a4 0 0
-b4 0 0
-c4 0 0
-d4 0 0
-a5 0 0
-b5 0 0
-c5 0 0
-d5 0 0
-a6 0 0
-b6 0 0
-c6 0 0
-d6 0 0
-a7 0 0
-a8 0 0
+start 9 0
+d0 18 0
+d1 18 3
+a2 0 5
+b2 6 5
+c2 12 5
+d2 18 5
+a3 0 7
+b3 6 7
+c3 12 7
+d3 18 7
+a4 0 9
+b4 6 9
+c4 12 9
+d4 18 9
+a5 0 11
+b5 6 11
+c5 12 11
+d5 18 11
+a6 0 13
+b6 6 13
+c6 12 13
+d6 18 13
+a7 0 15
+a8 0 17
 ##end
-end 0 0
+end 9 17
 # start room links
 start-a2
 start-b2

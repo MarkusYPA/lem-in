@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 )
@@ -43,14 +44,24 @@ func getStartInd(rs []room) int {
 func populateStart(rooms *[]room, ants []ant) {
 	start := &(*rooms)[getStartInd(*rooms)]
 	for _, a := range ants {
-		//start.Occupants = append(start.Occupants, a.Name)
 		start.Occupants[a.Name] = true
 	}
 }
 
 // printSolution prints the contents of the file and the moves taken
-func printSolution(file string, moves []string) {
-	fmt.Printf("%s\n\n", file)
+func printSolution(file *os.File, moves []string) {
+	// Reset file pointer to the beginning
+	if _, err := file.Seek(0, 0); err != nil {
+		fmt.Println("ERROR: seeking file failed:", err)
+		return
+	}
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
+	fmt.Println()
+
 	for _, v := range moves {
 		fmt.Println(v)
 	}
@@ -60,11 +71,13 @@ func main() {
 	if len(os.Args) != 2 {
 		handleError(fmt.Errorf("ERROR: provide the input file in one argument"))
 	}
-	in, err1 := os.ReadFile(os.Args[1])
+	file, err1 := os.Open(os.Args[1])
 	handleError(err1)
+	defer file.Close()
 
 	// read and save the number of ants and information about the rooms
-	nAnts, rooms := getStartValues(removeCarRet(string(in)))
+	nAnts, rooms := getStartValues(file)
+
 	verifyRooms(rooms)
 	// find all routes connecting "start" to "end" and all unique combinations of non-crossing routes
 	var routes []route
@@ -82,15 +95,14 @@ func main() {
 		bottleneck, so we focus only on combinations of separate routes
 
 		Optimal route combinations:
-		- A combination with the shortest route (always the best option for one ant)
-		- A combination with the most routes (best option for a large amount of ants)
+		- Combinations with the shortest route (best option for one ant)
+		- Combinations with the lowest average length for each number of routes (sometimes best for an average amount of ants)
+		- Combinations with the most routes (best for a large amount of ants)
 	*/
 
 	optimals := shortCombos(combosOfSeparates, routes)
-	//optimals = append(optimals, longCombos(combosOfSeparates)...)
 	optimals = append(optimals, lowAverages(combosOfSeparates)...)
-
-	optimals = reduceOptimals(optimals)
+	optimals = removeRedundant(optimals)
 
 	setsOfAnts := makeAnts(optimals, nAnts)
 	assignRoutes(optimals, &setsOfAnts)
@@ -101,6 +113,6 @@ func main() {
 	turns := moveAnts(&rooms, setsOfAnts[optI])
 
 	// Print out the file contents and the moves
-	printSolution(string(in), turns)
+	printSolution(file, turns)
 	//fmt.Println("Turns taken:", len(turns)) // for testing
 }

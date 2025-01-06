@@ -7,56 +7,57 @@ import (
 
 type testCase struct {
 	name     string
-	input    string
+	input    *os.File
 	expected int // number of turns
 }
 
 var testCases = []testCase{
 	{
 		name:     "example00",
-		input:    fileToString("testcases/example00.txt"),
+		input:    getFile("testcases/example00.txt"),
 		expected: 6,
 	},
 	{
 		name:     "example01",
-		input:    fileToString("testcases/example01.txt"),
+		input:    getFile("testcases/example01.txt"),
 		expected: 8,
 	},
 	{
 		name:     "example02",
-		input:    fileToString("testcases/example02.txt"),
+		input:    getFile("testcases/example02.txt"),
 		expected: 11,
 	},
 	{
 		name:     "example03",
-		input:    fileToString("testcases/example03.txt"),
+		input:    getFile("testcases/example03.txt"),
 		expected: 6,
 	},
 	{
 		name:     "example04",
-		input:    fileToString("testcases/example04.txt"),
+		input:    getFile("testcases/example04.txt"),
 		expected: 6,
 	},
 	{
 		name:     "example05",
-		input:    fileToString("testcases/example05.txt"),
+		input:    getFile("testcases/example05.txt"),
 		expected: 8,
 	},
 	{
 		name:     "example06",
-		input:    fileToString("testcases/example06.txt"),
+		input:    getFile("testcases/example06.txt"),
 		expected: 52,
 	},
 	{
 		name:     "example07",
-		input:    fileToString("testcases/example07.txt"),
+		input:    getFile("testcases/example07.txt"),
 		expected: 502,
 	},
 }
 
-func fileToString(s string) string {
-	file, _ := os.ReadFile(s)
-	return removeCarRet(string(file))
+func getFile(s string) *os.File {
+	file, err1 := os.Open(s)
+	handleError(err1)
+	return file
 }
 
 func TestMoveAntsGood(t *testing.T) {
@@ -74,9 +75,8 @@ func TestMoveAntsGood(t *testing.T) {
 			}
 
 			optimals := shortCombos(combosOfSeparates, routes)
-			//optimals = append(optimals, longCombos(combosOfSeparates)...)
 			optimals = append(optimals, lowAverages(combosOfSeparates)...)
-			optimals = reduceOptimals(optimals)
+			optimals = removeRedundant(optimals)
 
 			setsOfAnts := makeAnts(optimals, nAnts)
 			assignRoutes(optimals, &setsOfAnts)
