@@ -107,21 +107,31 @@ func findSeparates(routes, combo []route, allCombos *[][]route, ind int) []route
 	return combo
 }
 
+func comboAvgLength(combo []route) float64 {
+	lens := 0.0
+	for _, route := range combo {
+		lens += float64(len(route))
+	}
+	return lens / float64(len(combo))
+}
+
 // shortCombos returns all the longest combinations of routes that includes at least one of the shortest routes
 func shortCombos(seps [][]route, routes []route) [][]route {
 
 	shortestRoute := len(routes[0])
-	longestCombo := 0
+	longestComboWithShortest := 0
+	//var lowestAvgLen float64
 	for _, combo := range seps {
 		// First route in a combo is always the shortest
-		if len(combo[0]) == shortestRoute && len(combo) > longestCombo {
-			longestCombo = len(combo)
+		if len(combo[0]) == shortestRoute && len(combo) > longestComboWithShortest {
+			longestComboWithShortest = len(combo)
+			//lowestAvgLen = comboAvgLength(combo) // get a reasonable non-zero value for best average length
 		}
 	}
 
 	shorts := [][]route{}
 	for _, combo := range seps {
-		if len(combo[0]) == shortestRoute && len(combo) == longestCombo {
+		if len(combo[0]) == shortestRoute && len(combo) == longestComboWithShortest {
 			shorts = append(shorts, combo)
 		}
 	}
@@ -129,12 +139,56 @@ func shortCombos(seps [][]route, routes []route) [][]route {
 	return shorts
 }
 
-func comboAvgLength(combo []route) float64 {
-	lens := 0.0
-	for _, route := range combo {
-		lens += float64(len(route))
+func lowAverages(seps [][]route) [][]route {
+
+	combosByLength := make(map[int][][]route)
+	bestCombosByLength := make(map[int][][]route)
+	var longestCombo int
+	lowAvgs := [][]route{}
+
+	// Organize combinations by number of routes
+	for _, combo := range seps {
+		combosByLength[len(combo)] = append(combosByLength[len(combo)], combo)
+		if len(combo) > longestCombo {
+			longestCombo = len(combo)
+		}
 	}
-	return lens / float64(len(combo))
+
+	// Same organization but keep only the ones with the lowest average length
+	for key, category := range combosByLength {
+		bestAvgLen := comboAvgLength(category[0])
+		for _, combo := range category {
+			if comboAvgLength(combo) < bestAvgLen {
+				bestAvgLen = comboAvgLength(combo)
+			}
+		}
+		for _, combo := range category { // There may be several tied for shortest, therefore two loops
+			if comboAvgLength(combo) == bestAvgLen {
+				bestCombosByLength[key] = append(bestCombosByLength[key], combo)
+			}
+		}
+	}
+
+	// Add all longest ones since longest is always the best for a large amount of ants
+	lowAvgs = append(lowAvgs, bestCombosByLength[longestCombo]...)
+
+	// Remove worse solutions: if number of routes is lower and avg length is equal or greater
+	benchmark := comboAvgLength(bestCombosByLength[longestCombo][0])
+	for i := longestCombo - 1; i > 0; i-- {
+		for _, combo := range bestCombosByLength[i] {
+			if comboAvgLength(combo) < benchmark {
+				lowAvgs = append(lowAvgs, combo)
+				benchmark = comboAvgLength(combo)
+			}
+		}
+	}
+
+	/* 	fmt.Println("Low averages:")
+	   	for _, combo := range lowAvgs {
+	   		fmt.Println(combo)
+	   	} */
+
+	return lowAvgs
 }
 
 // longCombos returns all the longest combinations of routes with the lowest average lenght
@@ -166,6 +220,16 @@ func longCombos(seps [][]route) [][]route {
 
 }
 
+// isSubset checks if combo2 is functionally a subset of or similar to combo1. combo2 must not be longer than combo1.
+func isSubset(combo1 []route, combo2 []route) bool {
+	for i := range combo2 {
+		if len(combo2[i]) != len(combo1[i]) {
+			return false
+		}
+	}
+	return true
+}
+
 // reduceOptimals removes duplicates
 func reduceOptimals(optimals [][]route) [][]route {
 	uniques := [][]route{}
@@ -180,6 +244,31 @@ func reduceOptimals(optimals [][]route) [][]route {
 			uniques = append(uniques, optimals[i])
 		}
 	}
+
+	// sort uniques by descending length
+	for i := 0; i < len(uniques)-1; i++ {
+		for j := i + 1; j < len(uniques); j++ {
+			if len(uniques[i]) < len(uniques[j]) {
+				uniques[i], uniques[j] = uniques[j], uniques[i]
+			}
+		}
+	}
+
+	// remove functionally similar and functional subsets (same length routes)
+	functionalUniques := [][]route{uniques[0]}
+	for _, uniq := range uniques {
+		allowed := true
+		for _, fUniq := range functionalUniques {
+			if isSubset(fUniq, uniq) {
+				allowed = false
+				break
+			}
+		}
+		if allowed {
+			functionalUniques = append(functionalUniques, uniq)
+		}
+	}
+
 	return uniques
 }
 

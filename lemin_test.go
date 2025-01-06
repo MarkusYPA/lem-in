@@ -74,7 +74,8 @@ func TestMoveAntsGood(t *testing.T) {
 			}
 
 			optimals := shortCombos(combosOfSeparates, routes)
-			optimals = append(optimals, longCombos(combosOfSeparates)...)
+			//optimals = append(optimals, longCombos(combosOfSeparates)...)
+			optimals = append(optimals, lowAverages(combosOfSeparates)...)
 			optimals = reduceOptimals(optimals)
 
 			setsOfAnts := makeAnts(optimals, nAnts)

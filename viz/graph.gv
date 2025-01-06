@@ -6,6 +6,19 @@ digraph G {
     start [shape=box];
     end [shape=box];
 
+    # [fixedsize=true height= 0, width=0 color="transparent"];
+    # [fixedsize=true height= 0, width=0 color="transparent"];
+    # [fixedsize=true height= 0, width=0 color="transparent"];
+    # [fixedsize=true height= 0, width=0 color="transparent"];
+    # [fixedsize=true height= 0, width=0 color="transparent"];
+    # [fixedsize=true height= 0, width=0 color="transparent"];
+    # [fixedsize=true height= 0, width=0 color="transparent"];
+    # [fixedsize=true height= 0, width=0 color="transparent"];
+    # [fixedsize=true height= 0, width=0 color="transparent"];
+    # [fixedsize=true height= 0, width=0 color="transparent"];
+    # [fixedsize=true height= 0, width=0 color="transparent"];
+    # [fixedsize=true height= 0, width=0 color="transparent"];
+    # [fixedsize=true height= 0, width=0 color="transparent"];
     start [fixedsize=true height= 0, width=0 color="transparent"];
     d0 [fixedsize=true height= 0, width=0 color="transparent"];
     d1 [fixedsize=true height= 0, width=0 color="transparent"];
@@ -63,7 +76,7 @@ digraph G {
     d3 -> d4;
     d4 -> d5;
     d5 -> d6;
-    c2 -> d0;
-    b5 -> c3;
     a8 -> b6;
+    b5 -> c3;
+    c2 -> d0;
 }

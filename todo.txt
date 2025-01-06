@@ -2,3 +2,7 @@
 x Two by two optimal solutions
 x Rewrite func separate routes to be recursive
 - goroutines to find separates faster. Or not.
+- low averages
+- reduce optimals:
+    - remove subsets
+    - remove functionally similar (same lengths)

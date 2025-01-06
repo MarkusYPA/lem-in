@@ -21,8 +21,8 @@ COPY --from=builder /app/leminviz /leminviz
 COPY --from=builder /app/templates /templates
 COPY --from=builder /app/static /static
 
-# Expose the port your app runs on
+# Expose the port the app runs on
 EXPOSE 8080
 
-# Set the default command to run your app
+# Default command to run the visualizer
 CMD ["/leminviz"]

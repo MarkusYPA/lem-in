@@ -10,6 +10,7 @@ docker build -t leminvisualizer .
 Run a container with port 8080 and pipe input:
 ```bash
 cat test01out.txt | docker run -i -p 8080:8080 leminvisualizer
+(cd .. && go run . testcases/example01.txt) | docker run -i -p 8080:8080 leminvisualizer
 ```
 
 

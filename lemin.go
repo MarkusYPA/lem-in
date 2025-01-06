@@ -87,7 +87,9 @@ func main() {
 	*/
 
 	optimals := shortCombos(combosOfSeparates, routes)
-	optimals = append(optimals, longCombos(combosOfSeparates)...)
+	//optimals = append(optimals, longCombos(combosOfSeparates)...)
+	optimals = append(optimals, lowAverages(combosOfSeparates)...)
+
 	optimals = reduceOptimals(optimals)
 
 	setsOfAnts := makeAnts(optimals, nAnts)
@@ -100,5 +102,5 @@ func main() {
 
 	// Print out the file contents and the moves
 	printSolution(string(in), turns)
-	//fmt.Println(len(turns))	// for testing
+	//fmt.Println("Turns taken:", len(turns)) // for testing
 }
