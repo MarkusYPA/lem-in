@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"reflect"
+	"sync"
 )
 
 // isOnRoute tells if a room is on a slice
@@ -77,7 +78,7 @@ func areSeparate(rt1, rt2 *route) bool {
 }
 
 // findSeparates recurs through available routes to create combinations of separate routes
-func findSeparates(routes, curCombo []route, combosOfSeparates *[][]route, ind int) []route {
+func findSeparates(routes, curCombo []route, combosOfSeparates *[][]route, ind int, wg *sync.WaitGroup) {
 
 	// add this route to the current combination
 	curCombo = append(curCombo, routes[ind])
@@ -101,10 +102,12 @@ func findSeparates(routes, curCombo []route, combosOfSeparates *[][]route, ind i
 
 	// Grow the combo from each available route and add to all combinations
 	for i := range newRoutes {
-		*combosOfSeparates = append(*combosOfSeparates, findSeparates(newRoutes, curCombo, combosOfSeparates, i))
+		wg.Add(1)
+		go findSeparates(newRoutes, curCombo, combosOfSeparates, i, wg)
 	}
 
-	return curCombo
+	*combosOfSeparates = append(*combosOfSeparates, curCombo)
+	wg.Done()
 }
 
 // comboAvgLength calculates the average length of a slice of routes
