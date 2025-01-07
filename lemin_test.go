@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"sync"
 	"testing"
 )
 
@@ -70,9 +71,12 @@ func TestMoveAntsGood(t *testing.T) {
 			findRoutes(rooms[getStartInd(rooms)], route{}, &routes, &rooms)
 			sortRoutes(&routes)
 			combosOfSeparates := [][]route{}
+			wg := sync.WaitGroup{}
 			for i := range routes {
-				combosOfSeparates = append(combosOfSeparates, findSeparates(routes, []route{}, &combosOfSeparates, i))
+				wg.Add(1)
+				go findSeparates(routes, []route{}, &combosOfSeparates, i, &wg)
 			}
+			wg.Wait()
 
 			optimals := shortCombos(combosOfSeparates, routes)
 			optimals = append(optimals, lowAverages(combosOfSeparates)...)

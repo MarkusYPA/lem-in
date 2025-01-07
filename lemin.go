@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sync"
 )
 
 type room struct {
@@ -87,9 +88,13 @@ func main() {
 
 	// Find all combinations of non-crossing routes
 	combosOfSeparates := [][]route{}
+	wg := sync.WaitGroup{}
 	for i := range routes {
-		combosOfSeparates = append(combosOfSeparates, findSeparates(routes, []route{}, &combosOfSeparates, i))
+		wg.Add(1)
+		go findSeparates(routes, []route{}, &combosOfSeparates, i, &wg)
 	}
+	wg.Wait()
+
 	/*
 		Two crossing routes work effectively as one single route because of the
 		bottleneck, so we focus only on combinations of separate routes
