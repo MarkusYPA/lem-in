@@ -3,6 +3,7 @@
 # Check if an argument was provided
 if [ -z "$1" ]; then
   echo "Specify a text file in the testcases folder"
+  echo
   echo "Usage: $0 <filename>"
   echo "For instance: $0 example05"
   exit 1

@@ -6,6 +6,10 @@ import (
 	"sync"
 )
 
+var (
+	sepMu sync.Mutex
+)
+
 // isOnRoute tells if a room is on a slice
 func isOnRoute(route route, room room) bool {
 	for _, r := range route {
@@ -106,7 +110,10 @@ func findSeparates(routes, curCombo []route, combosOfSeparates *[][]route, ind i
 		go findSeparates(newRoutes, curCombo, combosOfSeparates, i, wg)
 	}
 
+	sepMu.Lock()
 	*combosOfSeparates = append(*combosOfSeparates, curCombo)
+	sepMu.Unlock()
+
 	wg.Done()
 }
 
