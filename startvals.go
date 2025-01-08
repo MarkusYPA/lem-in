@@ -10,7 +10,7 @@ import (
 )
 
 // getStartValues reads the number of ants and the slice of rooms from a text file
-func getStartValues(file *os.File) (int, []room) {
+func getStartValues(file *os.File) (int, []room, error) {
 	ants := 0
 	var err error
 	rooms := []room{}
@@ -28,7 +28,7 @@ func getStartValues(file *os.File) (int, []room) {
 		if i == 0 {
 			ants, err = strconv.Atoi(line)
 			if err != nil || ants < 1 {
-				handleError(errors.New("ERROR: invalid data format, invalid number of Ants: " + line))
+				return ants, rooms, errors.New("ERROR: invalid data format, invalid number of Ants: " + line)
 			}
 			prev = line
 			continue
@@ -57,15 +57,15 @@ func getStartValues(file *os.File) (int, []room) {
 				var errC1 error
 				thisRoom.Coords[0], errC1 = strconv.Atoi(roomWds[1])
 				if errC1 != nil {
-					handleError(errors.New("ERROR: invalid data format, " + errC1.Error()))
+					return ants, rooms, errors.New("ERROR: invalid data format, " + errC1.Error())
 				}
 				var errC2 error
 				thisRoom.Coords[1], errC2 = strconv.Atoi(roomWds[2])
 				if errC2 != nil {
-					handleError(errors.New("ERROR: invalid data format, " + errC2.Error()))
+					return ants, rooms, errors.New("ERROR: invalid data format, " + errC2.Error())
 				}
 			} else {
-				handleError(errors.New("ERROR: invalid data format, " + line))
+				return ants, rooms, errors.New("ERROR: invalid data format, " + line)
 			}
 
 			thisRoom.Occupants = make(map[int]bool)
@@ -88,11 +88,11 @@ func getStartValues(file *os.File) (int, []room) {
 		prev = line
 	}
 
-	return ants, rooms
+	return ants, rooms, nil
 }
 
 // verifyRooms makes sure there is one start and one end and no duplicate room names
-func verifyRooms(rooms []room) {
+func verifyRooms(rooms []room) error {
 	starts := 0
 	ends := 0
 	for i := 0; i < len(rooms); i++ {
@@ -104,7 +104,7 @@ func verifyRooms(rooms []room) {
 		}
 		for j := i + 1; j < len(rooms); j++ {
 			if rooms[i].Name == rooms[j].Name {
-				handleError(errors.New("ERROR: invalid data format, duplicate room name: " + rooms[i].Name))
+				return errors.New("ERROR: invalid data format, duplicate room name: " + rooms[i].Name)
 			}
 		}
 
@@ -116,24 +116,26 @@ func verifyRooms(rooms []room) {
 				}
 			}
 			if !found {
-				handleError(errors.New("ERROR: invalid data format, bad link: " + rooms[i].Name + " > " + ln))
+				return errors.New("ERROR: invalid data format, bad link: " + rooms[i].Name + " > " + ln)
 			}
 		}
 	}
 
 	if starts != 1 {
 		if starts == 0 {
-			handleError(errors.New("ERROR: invalid data format, no start room found"))
+			return errors.New("ERROR: invalid data format, no start room found")
 		} else {
-			handleError(errors.New("ERROR: invalid data format, too many start rooms"))
+			return errors.New("ERROR: invalid data format, too many start rooms")
 		}
 	}
 
 	if ends != 1 {
 		if ends == 0 {
-			handleError(errors.New("ERROR: invalid data format, no end room found"))
+			return errors.New("ERROR: invalid data format, no end room found")
 		} else {
-			handleError(errors.New("ERROR: invalid data format, too many end rooms"))
+			return errors.New("ERROR: invalid data format, too many end rooms")
 		}
 	}
+
+	return nil
 }

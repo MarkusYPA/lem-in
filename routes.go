@@ -54,9 +54,9 @@ func findRoutes(curRoom room, curRoute route, routes *[]route, rooms *[]room) {
 }
 
 // sortRoutes sorts a slice of routes from shortest to longest
-func sortRoutes(rts *[]route) {
+func sortRoutes(rts *[]route) error {
 	if len(*rts) < 1 {
-		handleError(fmt.Errorf("ERROR: invalid data format, no valid routes"))
+		return fmt.Errorf("ERROR: invalid data format, no valid routes")
 	}
 
 	for i := 0; i < len(*rts)-1; i++ {
@@ -66,6 +66,8 @@ func sortRoutes(rts *[]route) {
 			}
 		}
 	}
+
+	return nil
 }
 
 // areSeparate tells if two routes share intermediary rooms

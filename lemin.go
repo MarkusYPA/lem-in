@@ -77,14 +77,17 @@ func main() {
 	defer file.Close()
 
 	// read and save the number of ants and information about the rooms
-	nAnts, rooms := getStartValues(file)
+	nAnts, rooms, err := getStartValues(file)
+	handleError(err)
+	err = verifyRooms(rooms)
+	handleError(err)
 
-	verifyRooms(rooms)
 	// find all routes connecting "start" to "end" and all unique combinations of non-crossing routes
 	var routes []route
 	startRoom := rooms[getStartInd(rooms)]
 	findRoutes(startRoom, route{}, &routes, &rooms)
-	sortRoutes(&routes)
+	err = sortRoutes(&routes)
+	handleError(err)
 
 	// Find all combinations of non-crossing routes
 	combosOfSeparates := [][]route{}

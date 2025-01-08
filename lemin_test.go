@@ -6,13 +6,13 @@ import (
 	"testing"
 )
 
-type testCase struct {
+type testCaseGood struct {
 	name     string
 	input    *os.File
 	expected int // number of turns
 }
 
-var testCases = []testCase{
+var testCasesGood = []testCaseGood{
 	{
 		name:     "example00",
 		input:    getFile("testcases/example00.txt"),
@@ -62,14 +62,18 @@ func getFile(s string) *os.File {
 }
 
 func TestMoveAntsGood(t *testing.T) {
-	for _, tc := range testCases {
+	for _, tc := range testCasesGood {
 		t.Run(tc.name, func(t *testing.T) {
 
-			nAnts, rooms := getStartValues(tc.input)
-			verifyRooms(rooms)
+			nAnts, rooms, err := getStartValues(tc.input)
+			handleError(err)
+			err = verifyRooms(rooms)
+			handleError(err)
+
 			var routes []route
 			findRoutes(rooms[getStartInd(rooms)], route{}, &routes, &rooms)
 			sortRoutes(&routes)
+
 			combosOfSeparates := [][]route{}
 			wg := sync.WaitGroup{}
 			for i := range routes {
@@ -89,6 +93,122 @@ func TestMoveAntsGood(t *testing.T) {
 			turns := moveAnts(&rooms, setsOfAnts[optI])
 
 			result := len(turns)
+
+			if tc.expected != result {
+				t.Errorf("\n\"%s\"\nwant: %v\ngot:  %v", tc.name, tc.expected, result)
+			}
+		})
+	}
+}
+
+type testCaseBad struct {
+	name     string
+	input    *os.File
+	expected string // error message
+}
+
+var testCasesBad = []testCaseBad{
+	{
+		name:     "badexample00",
+		input:    getFile("testcases/badexample00.txt"),
+		expected: "ERROR: invalid data format",
+	},
+	{
+		name:     "badexample01",
+		input:    getFile("testcases/badexample01.txt"),
+		expected: "ERROR: invalid data format",
+	},
+	{
+		name:     "bad02",
+		input:    getFile("testcases/bad02.txt"),
+		expected: "ERROR: invalid data format",
+	},
+	{
+		name:     "bad03",
+		input:    getFile("testcases/bad03.txt"),
+		expected: "ERROR: invalid data format",
+	},
+	{
+		name:     "bad04",
+		input:    getFile("testcases/bad04.txt"),
+		expected: "ERROR: invalid data format",
+	},
+	{
+		name:     "bad05",
+		input:    getFile("testcases/bad05.txt"),
+		expected: "ERROR: invalid data format",
+	},
+	{
+		name:     "bad06",
+		input:    getFile("testcases/bad06.txt"),
+		expected: "ERROR: invalid data format",
+	},
+	{
+		name:     "example00",
+		input:    getFile("testcases/example00.txt"),
+		expected: "",
+	},
+	{
+		name:     "example01",
+		input:    getFile("testcases/example01.txt"),
+		expected: "",
+	},
+	{
+		name:     "example02",
+		input:    getFile("testcases/example02.txt"),
+		expected: "",
+	},
+	{
+		name:     "example03",
+		input:    getFile("testcases/example03.txt"),
+		expected: "",
+	},
+	{
+		name:     "example04",
+		input:    getFile("testcases/example04.txt"),
+		expected: "",
+	},
+	{
+		name:     "example05",
+		input:    getFile("testcases/example05.txt"),
+		expected: "",
+	},
+	{
+		name:     "example06",
+		input:    getFile("testcases/example06.txt"),
+		expected: "",
+	},
+	{
+		name:     "example07",
+		input:    getFile("testcases/example07.txt"),
+		expected: "",
+	},
+}
+
+func TestForErrors(t *testing.T) {
+	for _, tc := range testCasesBad {
+		t.Run(tc.name, func(t *testing.T) {
+
+			// Errors for wrongly formatted data
+			_, rooms, err := getStartValues(tc.input)
+
+			// Errors for invalid data
+			if err == nil {
+				err = verifyRooms(rooms)
+			}
+
+			// Error for 0 routes
+			if err == nil {
+				var routes []route
+				startRoom := rooms[getStartInd(rooms)]
+				findRoutes(startRoom, route{}, &routes, &rooms)
+				err = sortRoutes(&routes)
+			}
+
+			var result string
+			if err != nil {
+				result = err.Error()[:26]
+			}
 
 			if tc.expected != result {
 				t.Errorf("\n\"%s\"\nwant: %v\ngot:  %v", tc.name, tc.expected, result)
