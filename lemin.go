@@ -50,7 +50,7 @@ func populateStart(rooms *[]room, ants []ant) {
 }
 
 // printSolution prints the contents of the file and the moves taken
-func printSolution(file *os.File, moves []string) {
+func printSolution(file *os.File, turns []string) {
 	// Reset file pointer to the beginning
 	if _, err := file.Seek(0, 0); err != nil {
 		fmt.Println("ERROR: seeking file failed:", err)
@@ -63,12 +63,13 @@ func printSolution(file *os.File, moves []string) {
 	}
 	fmt.Println()
 
-	for _, v := range moves {
+	for _, v := range turns {
 		fmt.Println(v)
 	}
 }
 
 func main() {
+
 	if len(os.Args) != 2 {
 		handleError(fmt.Errorf("ERROR: provide the input file in one argument"))
 	}
@@ -114,7 +115,7 @@ func main() {
 
 	setsOfAnts := makeAnts(optimals, nAnts)
 	assignRoutes(optimals, &setsOfAnts)
-	_, optI := bestSolution(optimals, setsOfAnts)
+	optI := bestSolution(optimals, setsOfAnts)
 	populateStart(&rooms, setsOfAnts[optI])
 
 	// Move ants and save the moves

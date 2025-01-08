@@ -74,7 +74,8 @@ func nextIsOk(a ant, rooms *[]room, usedLinks [][2]string) (bool, *room, *room) 
 	}
 
 	// true if next room is empty or the end
-	return len(next.Occupants) < 1 || next.Role == "end", curr, next
+	nextIsEmpty := len(next.Occupants) < 1
+	return nextIsEmpty || next.Role == "end", curr, next
 }
 
 // moveAnts moves the ants across the farm and returns the commands to do so
@@ -105,9 +106,7 @@ func moveAnts(rms *[]room, ants []ant) []string {
 			}
 		}
 
-		if moves != "" {
-			turns = append(turns, moves[:len(moves)-1]) // append this turn without the last space character
-		}
+		turns = append(turns, moves[:len(moves)-1]) // append this turn without the last space character
 	}
 
 	return turns
