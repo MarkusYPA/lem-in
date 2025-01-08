@@ -16,9 +16,11 @@ type room struct {
 }
 
 type ant struct {
-	Name  int
-	Route route
-	atEnd bool
+	Name       int
+	Route      route
+	Route2     [](*room)
+	routeIndex int
+	atEnd      bool
 }
 
 type route []string
@@ -111,9 +113,10 @@ func main() {
 	optimals := shortCombos(combosOfSeparates, routes)
 	optimals = append(optimals, lowAverages(combosOfSeparates)...) // lowAverages() also finds the longest combinations
 	optimals = removeRedundant(optimals)
+	optiRooms := optimalsToRooms(optimals, &rooms) // optimal routes as slices of rooms instead of slices of room names
 
 	setsOfAnts := makeAnts(optimals, nAnts)
-	assignRoutes(optimals, &setsOfAnts)
+	assignRoutes(optimals, optiRooms, &setsOfAnts, &startRoom, &rooms)
 	_, optI := bestSolution(optimals, setsOfAnts)
 	populateStart(&rooms, setsOfAnts[optI])
 
@@ -121,6 +124,6 @@ func main() {
 	turns := moveAnts(&rooms, setsOfAnts[optI])
 
 	// Print out the file contents and the moves
-	printSolution(file, turns)
-	//fmt.Println("Turns taken:", len(turns)) // for testing
+	//printSolution(file, turns)
+	fmt.Println("Turns taken:", len(turns)) // for testing
 }

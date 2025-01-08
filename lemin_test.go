@@ -71,7 +71,8 @@ func TestMoveAntsGood(t *testing.T) {
 			handleError(err)
 
 			var routes []route
-			findRoutes(rooms[getStartInd(rooms)], route{}, &routes, &rooms)
+			startRoom := rooms[getStartInd(rooms)]
+			findRoutes(startRoom, route{}, &routes, &rooms)
 			sortRoutes(&routes)
 
 			combosOfSeparates := [][]route{}
@@ -85,9 +86,10 @@ func TestMoveAntsGood(t *testing.T) {
 			optimals := shortCombos(combosOfSeparates, routes)
 			optimals = append(optimals, lowAverages(combosOfSeparates)...)
 			optimals = removeRedundant(optimals)
+			optiRooms := optimalsToRooms(optimals, &rooms) // optimal routes as slices of rooms instead of slices of room names
 
 			setsOfAnts := makeAnts(optimals, nAnts)
-			assignRoutes(optimals, &setsOfAnts)
+			assignRoutes(optimals, optiRooms, &setsOfAnts, &startRoom, &rooms)
 			_, optI := bestSolution(optimals, setsOfAnts)
 			populateStart(&rooms, setsOfAnts[optI])
 			turns := moveAnts(&rooms, setsOfAnts[optI])

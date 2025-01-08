@@ -7,6 +7,7 @@ import (
 // makeAnts makes a group of ants for each combination of routes to be tested
 func makeAnts(optimals [][]route, n int) [][]ant {
 	setsOfAnts := [][]ant{}
+
 	for i := range optimals {
 		setsOfAnts = append(setsOfAnts, []ant{})
 		for j := range n {
@@ -17,7 +18,7 @@ func makeAnts(optimals [][]route, n int) [][]ant {
 }
 
 // assignRoutes gives each ant a route to follow
-func assignRoutes(optimals [][]route, setsOfAnts *[][]ant) {
+func assignRoutes(optimals [][]route, optiRooms [][][]*room, setsOfAnts *[][]ant, startRoom *room, rooms *[]room) {
 	for i, routeCombo := range optimals {
 		// how many ants on each route in this combo
 		onRoutes := make([]int, len(routeCombo))
@@ -34,6 +35,8 @@ func assignRoutes(optimals [][]route, setsOfAnts *[][]ant) {
 				}
 			}
 			(*setsOfAnts)[i][j].Route = routeCombo[shortest]
+			(*setsOfAnts)[i][j].Route2 = optiRooms[i][shortest]
+
 			onRoutes[shortest]++
 		}
 	}
@@ -55,16 +58,14 @@ func nextRoom(rms *[]room, curr room, a ant) *room {
 func nextIsOk(a ant, rooms *[]room, usedLinks [][2]string) (bool, *room, *room) {
 	var curr *room
 	var next *room
-	for i, rm := range *rooms {
-		if _, ok := rm.Occupants[a.Name]; ok {
-			curr = &(*rooms)[i]
-		}
-	}
+
+	curr = a.Route2[a.routeIndex]
+
 	if curr.Role == "end" {
 		return false, curr, next
 	}
 
-	next = nextRoom(rooms, *curr, a)
+	next = a.Route2[a.routeIndex+1]
 
 	// false if this link was already used on this turn
 	for _, link := range usedLinks {
@@ -95,6 +96,7 @@ func moveAnts(rms *[]room, ants []ant) []string {
 					delete(currentRoom.Occupants, ants[i].Name)
 					linksUsed = append(linksUsed, [2]string{currentRoom.Name, nextRoom.Name}) // mark this link as used
 					nextRoom.Occupants[ants[i].Name] = true
+					ants[i].routeIndex++
 					if nextRoom.Role == "end" {
 						ants[i].atEnd = true
 						antsAtEnd++

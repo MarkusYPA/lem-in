@@ -253,6 +253,26 @@ func removeRedundant(optimals [][]route) [][]route {
 	return functionalUniques
 }
 
+func optimalsToRooms(optimals [][]route, rooms *[]room) [][][](*room) {
+
+	roomCombos := [][][](*room){} // multiple combinations of routes
+
+	for i, combo := range optimals {
+		roomCombos = append(roomCombos, [][](*room){}) // combination of routes
+
+		for j, route := range combo {
+			roomCombos[i] = append(roomCombos[i], [](*room){}) // one route
+
+			for _, roomName := range route {
+				thisRoom := &(*rooms)[findRoom(*rooms, roomName)]
+				roomCombos[i][j] = append(roomCombos[i][j], thisRoom)
+			}
+		}
+	}
+
+	return roomCombos
+}
+
 // bestSolution measures known optimal route combinations for the given number
 // of ants and returns the shortest one and its index
 func bestSolution(optimals [][]route, sAnts [][]ant) ([]route, int) {
