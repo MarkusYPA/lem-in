@@ -76,13 +76,13 @@ func main() {
 	handleError(err1)
 	defer file.Close()
 
-	// read and save the number of ants and information about the rooms
+	// Read and save the number of ants and information about the rooms
 	nAnts, rooms, err := getStartValues(file)
 	handleError(err)
 	err = verifyRooms(rooms)
 	handleError(err)
 
-	// find all routes connecting "start" to "end" and all unique combinations of non-crossing routes
+	// Find all routes connecting "start" to "end"
 	var routes []route
 	startRoom := rooms[getStartInd(rooms)]
 	findRoutes(startRoom, route{}, &routes, &rooms)
@@ -109,7 +109,7 @@ func main() {
 	*/
 
 	optimals := shortCombos(combosOfSeparates, routes)
-	optimals = append(optimals, lowAverages(combosOfSeparates)...)
+	optimals = append(optimals, lowAverages(combosOfSeparates)...) // lowAverages() also finds the longest combinations
 	optimals = removeRedundant(optimals)
 
 	setsOfAnts := makeAnts(optimals, nAnts)
