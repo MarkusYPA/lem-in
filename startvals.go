@@ -123,7 +123,7 @@ func verifyRooms(rooms []room) error {
 
 	if starts != 1 {
 		if starts == 0 {
-			return errors.New("ERROR: invalid data format, no start room found")
+			return errors.New("ERROR: invalid data format, no start room")
 		} else {
 			return errors.New("ERROR: invalid data format, too many start rooms")
 		}
@@ -131,7 +131,7 @@ func verifyRooms(rooms []room) error {
 
 	if ends != 1 {
 		if ends == 0 {
-			return errors.New("ERROR: invalid data format, no end room found")
+			return errors.New("ERROR: invalid data format, no end room")
 		} else {
 			return errors.New("ERROR: invalid data format, too many end rooms")
 		}

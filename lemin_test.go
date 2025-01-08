@@ -111,37 +111,37 @@ var testCasesBad = []testCaseBad{
 	{
 		name:     "badexample00",
 		input:    getFile("testcases/badexample00.txt"),
-		expected: "ERROR: invalid data format",
+		expected: "ERROR: invalid data format, invalid number of Ants: 0",
 	},
 	{
 		name:     "badexample01",
 		input:    getFile("testcases/badexample01.txt"),
-		expected: "ERROR: invalid data format",
+		expected: "ERROR: invalid data format, no valid routes",
 	},
 	{
 		name:     "bad02",
 		input:    getFile("testcases/bad02.txt"),
-		expected: "ERROR: invalid data format",
+		expected: "ERROR: invalid data format, too many start rooms",
 	},
 	{
 		name:     "bad03",
 		input:    getFile("testcases/bad03.txt"),
-		expected: "ERROR: invalid data format",
+		expected: "ERROR: invalid data format, too many end rooms",
 	},
 	{
 		name:     "bad04",
 		input:    getFile("testcases/bad04.txt"),
-		expected: "ERROR: invalid data format",
+		expected: "ERROR: invalid data format, no end room",
 	},
 	{
 		name:     "bad05",
 		input:    getFile("testcases/bad05.txt"),
-		expected: "ERROR: invalid data format",
+		expected: "ERROR: invalid data format, duplicate room name: 3",
 	},
 	{
 		name:     "bad06",
 		input:    getFile("testcases/bad06.txt"),
-		expected: "ERROR: invalid data format",
+		expected: "ERROR: invalid data format, bad link: 2 > 5",
 	},
 	{
 		name:     "example00",
@@ -207,7 +207,7 @@ func TestForErrors(t *testing.T) {
 
 			var result string
 			if err != nil {
-				result = err.Error()[:26]
+				result = err.Error()
 			}
 
 			if tc.expected != result {
