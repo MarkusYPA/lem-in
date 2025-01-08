@@ -90,7 +90,7 @@ func TestMoveAntsGood(t *testing.T) {
 
 			setsOfAnts := makeAnts(optimals, nAnts)
 			assignRoutes(optimals, optiRooms, &setsOfAnts, &startRoom, &rooms)
-			_, optI := bestSolution(optimals, setsOfAnts)
+			optI := bestSolution(optimals, setsOfAnts)
 			populateStart(&rooms, setsOfAnts[optI])
 			turns := moveAnts(&rooms, setsOfAnts[optI])
 

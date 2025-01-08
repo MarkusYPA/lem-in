@@ -99,6 +99,7 @@ func findSeparates(routes, curCombo []route, combosOfSeparates *[][]route, ind i
 		for _, foundRoute := range curCombo {
 			if !areSeparate(&foundRoute, &potentialRoute) {
 				separate = false
+				break
 			}
 		}
 		if separate {
@@ -275,25 +276,25 @@ func optimalsToRooms(optimals [][]route, rooms *[]room) [][][](*room) {
 
 // bestSolution measures known optimal route combinations for the given number
 // of ants and returns the shortest one and its index
-func bestSolution(optimals [][]route, sAnts [][]ant) ([]route, int) {
+func bestSolution(optimals [][]route, setsOfAnts [][]ant) int {
 	if len(optimals) == 1 {
-		return optimals[0], 0
+		return 0
 	}
 
 	longestRoutes := make([]int, len(optimals))
 	for i, combo := range optimals {
 		longest := 0
-		for _, rt := range combo {
+		for _, route := range combo {
 			// count ants on this route
 			ants := 0
-			for _, ant := range sAnts[i] {
-				if reflect.DeepEqual(ant.Route, rt) {
+			for _, ant := range setsOfAnts[i] {
+				if reflect.DeepEqual(ant.Route, route) {
 					ants++
 				}
 			}
 
 			// turns to complete this route (only compare to longest if active)
-			turns := len(rt) - 1 + ants
+			turns := len(route) - 1 + ants
 			if ants > 0 && turns > longest {
 				longest = turns
 			}
@@ -302,16 +303,14 @@ func bestSolution(optimals [][]route, sAnts [][]ant) ([]route, int) {
 	}
 
 	// find which optimal route is the quickest for these ants
-	quickest := optimals[0]
 	quickI := 0
 	shortestLong := longestRoutes[0]
 	for i, n := range longestRoutes {
 		if n < shortestLong {
 			shortestLong = n
-			quickest = optimals[i]
 			quickI = i
 		}
 	}
 
-	return quickest, quickI
+	return quickI
 }

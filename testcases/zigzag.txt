@@ -1,4 +1,4 @@
-6
+21
 #
 # This maze is constructed to have three solutions that completely
 # prevent each other:
