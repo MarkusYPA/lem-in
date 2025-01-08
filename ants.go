@@ -34,38 +34,24 @@ func assignRoutes(optimals [][]route, optiRooms [][][]*room, setsOfAnts *[][]ant
 					shortD = len(routeCombo[k]) + onRoutes[k]
 				}
 			}
-			(*setsOfAnts)[i][j].Route = routeCombo[shortest]
-			(*setsOfAnts)[i][j].Route2 = optiRooms[i][shortest]
+			(*setsOfAnts)[i][j].Route = optiRooms[i][shortest]
 
 			onRoutes[shortest]++
 		}
 	}
 }
 
-// nextRoom finds the next room on an ant's route
-func nextRoom(rms *[]room, curr room, a ant) *room {
-	var next *room
-	for i, roomName := range a.Route {
-		if roomName == curr.Name && i < len(a.Route)-1 {
-			next = &(*rms)[findRoom((*rms), a.Route[i+1])]
-		}
-	}
-	return next
-}
-
 // nextIsOk returns true if the next room has space and
 // the route to it hasn't been used on this turn already
-func nextIsOk(a ant, rooms *[]room, usedLinks [][2]string) (bool, *room, *room) {
-	var curr *room
+func nextIsOk(a ant, usedLinks [][2]string) (bool, *room, *room) {
+	curr := a.Route[a.routeIndex]
 	var next *room
-
-	curr = a.Route2[a.routeIndex]
 
 	if curr.Role == "end" {
 		return false, curr, next
 	}
 
-	next = a.Route2[a.routeIndex+1]
+	next = a.Route[a.routeIndex+1]
 
 	// false if this link was already used on this turn
 	for _, link := range usedLinks {
@@ -80,7 +66,7 @@ func nextIsOk(a ant, rooms *[]room, usedLinks [][2]string) (bool, *room, *room) 
 }
 
 // moveAnts moves the ants across the farm and returns the commands to do so
-func moveAnts(rms *[]room, ants []ant) []string {
+func moveAnts(ants []ant) []string {
 	turns := []string{}
 	antsAtEnd := 0
 
@@ -92,7 +78,7 @@ func moveAnts(rms *[]room, ants []ant) []string {
 		// try to move each ant
 		for i := 0; i < len(ants); i++ {
 			if !ants[i].atEnd {
-				NextOk, currentRoom, nextRoom := nextIsOk(ants[i], rms, linksUsed)
+				NextOk, currentRoom, nextRoom := nextIsOk(ants[i], linksUsed)
 				if NextOk {
 					delete(currentRoom.Occupants, ants[i].Name)
 					linksUsed = append(linksUsed, [2]string{currentRoom.Name, nextRoom.Name}) // mark this link as used

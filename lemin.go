@@ -17,8 +17,7 @@ type room struct {
 
 type ant struct {
 	Name       int
-	Route      route
-	Route2     [](*room)
+	Route      [](*room)
 	routeIndex int
 	atEnd      bool
 }
@@ -122,9 +121,9 @@ func main() {
 	populateStart(&rooms, setsOfAnts[optI])
 
 	// Move ants and save the moves
-	turns := moveAnts(&rooms, setsOfAnts[optI])
+	turns := moveAnts(setsOfAnts[optI])
 
 	// Print out the file contents and the moves
-	//printSolution(file, turns)
-	fmt.Println("Turns taken:", len(turns)) // for testing
+	printSolution(file, turns)
+	//fmt.Println("Turns taken:", len(turns)) // for testing
 }
