@@ -276,7 +276,7 @@ func optimalsToRooms(optimals [][]route, rooms *[]room) [][][](*room) {
 
 // bestSolution measures known optimal route combinations for the given number
 // of ants and returns the shortest one and its index
-func bestSolution(optimals [][]route, setsOfAnts [][]ant) int {
+func bestSolution(optimals [][][]*room, setsOfAnts [][]ant) int {
 	if len(optimals) == 1 {
 		return 0
 	}

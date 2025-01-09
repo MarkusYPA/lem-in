@@ -113,11 +113,11 @@ func main() {
 	optimals := shortCombos(combosOfSeparates, routes)
 	optimals = append(optimals, lowAverages(combosOfSeparates)...) // lowAverages() also finds the longest combinations
 	optimals = removeRedundant(optimals)
-	optiRooms := optimalsToRooms(optimals, &rooms) // optimal routes as slices of rooms instead of slices of room names
+	optiRooms := optimalsToRooms(optimals, &rooms) // optimal routes as slices of rooms instead of slices of room names */
 
 	setsOfAnts := makeAnts(optimals, nAnts)
 	assignRoutes(optimals, optiRooms, &setsOfAnts, &startRoom, &rooms)
-	optI := bestSolution(optimals, setsOfAnts)
+	optI := bestSolution(optiRooms, setsOfAnts)
 	populateStart(&rooms, setsOfAnts[optI])
 
 	// Move ants and save the moves
