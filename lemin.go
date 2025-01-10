@@ -16,10 +16,10 @@ type room struct {
 }
 
 type ant struct {
-	Name       int
-	Route      [](*room)
-	routeIndex int
-	atEnd      bool
+	Name      int
+	Route     [](*room)
+	roomIndex int
+	atEnd     bool
 }
 
 type route []string
@@ -110,13 +110,16 @@ func main() {
 		- Combinations with the most routes (best for a large amount of ants)
 	*/
 
+	// Reduce the amount of solutions to test
 	optimals := shortCombos(combosOfSeparates, routes)
 	optimals = append(optimals, lowAverages(combosOfSeparates)...) // lowAverages() also finds the longest combinations
 	optimals = removeRedundant(optimals)
-	optiRooms := optimalsToRooms(optimals, &rooms) // optimal routes as slices of rooms instead of slices of room names */
+
+	optiRooms := optimalsToRooms(optimals, &rooms) // optimal routes as slices of rooms instead of slices of room names
 
 	setsOfAnts := makeAnts(optimals, nAnts)
-	assignRoutes(optimals, optiRooms, &setsOfAnts, &startRoom, &rooms)
+	assignRoutes(optimals, optiRooms, &setsOfAnts)
+
 	optI := bestSolution(optiRooms, setsOfAnts)
 	populateStart(&rooms, setsOfAnts[optI])
 

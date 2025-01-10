@@ -1,6 +1,6 @@
 # lem-in
 
-Lem-in moves ants across an ant farm in a most efficient way. A text file specifies the rooms and tunnels connecting them. No upper limit exists to how many ants can move during a turn, but each ant can move only once. Only the start and end rooms are allowed more than one ant at a time. Any tunnel can be used only once per turn. 
+Lem-in moves ants across an ant farm in a most efficient way. A text file specifies rooms and the tunnels connecting them. No upper limit exists to how many ants can move during a turn, but each ant can move only once. Only the start and end rooms are allowed more than one ant at a time. Any tunnel can be used only once per turn. 
 
 
 ## How to run 
@@ -55,3 +55,8 @@ Removing all unused images, containers, networks, and volumes:\
 docker system prune -a -f
 ```
 
+## Authors
+[Markus Amberla](https://github.com/MarkusYPA)\
+[Anastasija Suhareva](https://01.gritlab.ax/git/asuharev)\
+[Oleg Balandin](https://github.com/olegamobile)\
+[Ekaterina Abrakhova](https://01.gritlab.ax/git/eabrakho)

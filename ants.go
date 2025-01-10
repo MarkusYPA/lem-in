@@ -18,7 +18,7 @@ func makeAnts(optimals [][]route, n int) [][]ant {
 }
 
 // assignRoutes gives each ant a route to follow
-func assignRoutes(optimals [][]route, optiRooms [][][]*room, setsOfAnts *[][]ant, startRoom *room, rooms *[]room) {
+func assignRoutes(optimals [][]route, optiRooms [][][]*room, setsOfAnts *[][]ant) {
 	for i, routeCombo := range optimals {
 		// how many ants on each route in this combo
 		onRoutes := make([]int, len(routeCombo))
@@ -44,14 +44,14 @@ func assignRoutes(optimals [][]route, optiRooms [][][]*room, setsOfAnts *[][]ant
 // nextIsOk returns true if the next room has space and
 // the route to it hasn't been used on this turn already
 func nextIsOk(a ant, usedLinks [][2]string) (bool, *room, *room) {
-	curr := a.Route[a.routeIndex]
+	curr := a.Route[a.roomIndex]
 	var next *room
 
 	if curr.Role == "end" {
 		return false, curr, next
 	}
 
-	next = a.Route[a.routeIndex+1]
+	next = a.Route[a.roomIndex+1]
 
 	// false if this link was already used on this turn
 	for _, link := range usedLinks {
@@ -83,18 +83,18 @@ func moveAnts(ants []ant) []string {
 					delete(currentRoom.Occupants, ants[i].Name)
 					linksUsed = append(linksUsed, [2]string{currentRoom.Name, nextRoom.Name}) // mark this link as used
 					nextRoom.Occupants[ants[i].Name] = true
-					ants[i].routeIndex++
+					ants[i].roomIndex++
 					if nextRoom.Role == "end" {
 						ants[i].atEnd = true
 						antsAtEnd++
 					}
-					// add move to current turn
+					// add this move to the moves on this turn
 					moves += "L" + strconv.Itoa(ants[i].Name) + "-" + nextRoom.Name + " "
 				}
 			}
 		}
 
-		turns = append(turns, moves[:len(moves)-1]) // append this turn without the last space character
+		turns = append(turns, moves[:len(moves)-1]) // These moves are one turn, remove the last space character
 	}
 
 	return turns

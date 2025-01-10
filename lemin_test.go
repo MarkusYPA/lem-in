@@ -89,7 +89,7 @@ func TestMoveAntsGood(t *testing.T) {
 			optiRooms := optimalsToRooms(optimals, &rooms) // optimal routes as slices of rooms instead of slices of room names
 
 			setsOfAnts := makeAnts(optimals, nAnts)
-			assignRoutes(optimals, optiRooms, &setsOfAnts, &startRoom, &rooms)
+			assignRoutes(optimals, optiRooms, &setsOfAnts)
 			optI := bestSolution(optiRooms, setsOfAnts)
 			populateStart(&rooms, setsOfAnts[optI])
 			turns := moveAnts(setsOfAnts[optI])
