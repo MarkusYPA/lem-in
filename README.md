@@ -59,4 +59,4 @@ docker system prune -a -f
 [Markus Amberla](https://github.com/MarkusYPA)\
 [Anastasija Suhareva](https://github.com/An1Su)\
 [Oleg Balandin](https://github.com/olegamobile)\
-[Ekaterina Abrakhova](https://01.gritlab.ax/git/eabrakho)
+[Ekaterina Abrakhova](https://github.com/abrakhova)

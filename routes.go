@@ -107,15 +107,17 @@ func findSeparates(routes, curCombo []route, combosOfSeparates *[][]route, ind i
 		}
 	}
 
+	if len(newRoutes) == 0 {
+		sepMu.Lock()
+		*combosOfSeparates = append(*combosOfSeparates, curCombo)
+		sepMu.Unlock()
+	}
+
 	// Grow the combo from each available route and add to all combinations
 	for i := range newRoutes {
 		wg.Add(1)
 		go findSeparates(newRoutes, curCombo, combosOfSeparates, i, wg)
 	}
-
-	sepMu.Lock()
-	*combosOfSeparates = append(*combosOfSeparates, curCombo)
-	sepMu.Unlock()
 
 	wg.Done()
 }
