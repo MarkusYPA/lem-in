@@ -7,6 +7,11 @@
     <title>Ant Movement Animation</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.1/gsap.min.js"></script>
     <style>
+        
+        body {
+            font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        }
+
         #svg-container svg {
             width: 100%;
             height: auto;
@@ -97,8 +102,8 @@
                         onUpdate: () => {
                             // Query a point at the new distance value
                             const point = path.getPointAtLength(val.distance);
-                            antForm.setAttribute('cx', point.x);
-                            antForm.setAttribute('cy', point.y);
+                            antForm.setAttribute('x', point.x - 38); // Center horizontally
+                            antForm.setAttribute('y', point.y - 20); // Center vertically
                         }
                     });
                 }
@@ -121,7 +126,8 @@
                 let antForms = [];
                 for (let i = 0; i < listOfMovelists.length; i++) {
                     // Put a red circle to start node
-                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    const antImage = document.createElementNS("http://www.w3.org/2000/svg", "image");
+
                     if (startNodeTitle) {
                         const startNode = startNodeTitle.parentNode.querySelector("polygon");
 
@@ -130,15 +136,18 @@
                         const startX = parseFloat(startCoords[0]);
                         const startY = parseFloat(startCoords[1]);
 
-                        // Set red dot attributes                    
-                        circle.setAttribute("r", "5");
-                        circle.setAttribute("fill", "red");
-                        circle.setAttribute("cx", startX);
-                        circle.setAttribute("cy", startY);
-                        circle.setAttribute("transform", transform); // Apply the main transform
-                        svgElement.appendChild(circle);
+                        // Set attributes for the ant image
+                        antImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "static/ant.svg");
+                        antImage.setAttribute("width", "80"); // Set width of the ant
+                        antImage.setAttribute("height", "60"); // Set height of the ant
+                        antImage.setAttribute("x", startX - 38); // Adjust x to center the image
+                        antImage.setAttribute("y", startY - 20); // Adjust y to center the image
+                        antImage.setAttribute("transform", transform); // Apply the main transform
+
+                        svgElement.appendChild(antImage);
                     }
-                    antForms.push(circle);
+                    //antForms.push(circle);
+                    antForms.push(antImage);
                 }
 
                 // Run the animations, with a small pause between turns
