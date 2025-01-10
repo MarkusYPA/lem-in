@@ -57,6 +57,6 @@ docker system prune -a -f
 
 ## Authors
 [Markus Amberla](https://github.com/MarkusYPA)\
-[Anastasija Suhareva](https://01.gritlab.ax/git/asuharev)\
+[Anastasija Suhareva](https://github.com/An1Su)\
 [Oleg Balandin](https://github.com/olegamobile)\
 [Ekaterina Abrakhova](https://01.gritlab.ax/git/eabrakho)
