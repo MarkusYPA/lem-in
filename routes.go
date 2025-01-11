@@ -71,16 +71,16 @@ func sortRoutes(rts *[]route) error {
 }
 
 // areSeparate tells if two routes share intermediary rooms
-func areSeparate(rt1, rt2 *route) bool {
+func sharedRoom(rt1, rt2 *route) bool {
 	// compare all rooms except start and end
 	for _, room1 := range (*rt1)[1 : len(*rt1)-1] {
 		for _, room2 := range (*rt2)[1 : len(*rt2)-1] {
 			if room1 == room2 {
-				return false
+				return true
 			}
 		}
 	}
-	return true
+	return false
 }
 
 // findSeparates recurs through available routes to create combinations of separate routes
@@ -96,12 +96,12 @@ func findSeparates(routes, curCombo []route, combosOfSeparates *[][]route, ind i
 	newRoutes := []route{}
 	for _, potentialRoute := range routes {
 		separate := true
-		for _, foundRoute := range curCombo {
-			if !areSeparate(&foundRoute, &potentialRoute) {
-				separate = false
-				break
-			}
+
+		// See if potential routes clash with the latest addition
+		if sharedRoom(&curCombo[len(curCombo)-1], &potentialRoute) {
+			separate = false
 		}
+
 		if separate {
 			newRoutes = append(newRoutes, potentialRoute)
 		}
